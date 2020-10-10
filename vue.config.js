@@ -5,7 +5,7 @@ module.exports = {
   pages: {
     index: {
       entry: 'src/renderer/index.js',
-      template: 'src/renderer/public/index.html',
+      template: 'public/index.html',
       filename: 'index.html',
       title: 'Face Shield',
     },

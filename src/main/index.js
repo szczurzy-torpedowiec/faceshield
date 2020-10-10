@@ -1,13 +1,15 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import {app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
+let tray
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -41,12 +43,40 @@ function createWindow() {
   })
 }
 
+function createTray() {
+  tray = new Tray(nativeImage.createFromPath(path.join(__static, 'icon-32.png'))) // TODO: add proper icon
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Source code on GitHub',
+      type: 'normal',
+      click() { shell.openExternal('https://github.com/doteq/faceshield') }
+    },
+    {
+      type: 'separator'
+    },
+    {
+      label: 'Quit Face Shield',
+      type: 'normal',
+      role: 'quit'
+    }
+  ])
+  tray.setToolTip('Face Shield')
+  tray.setContextMenu(contextMenu)
+  tray.addListener('click', () => {
+    if (win === null) {
+      createWindow()
+    } else {
+      win.focus()
+    }
+  })
+}
+
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
-    app.quit()
+    // app.quit()
   }
 })
 
@@ -71,6 +101,7 @@ app.on('ready', async () => {
     }
   }
   createWindow()
+  createTray()
 })
 
 // Exit cleanly on request from parent process in development mode.
