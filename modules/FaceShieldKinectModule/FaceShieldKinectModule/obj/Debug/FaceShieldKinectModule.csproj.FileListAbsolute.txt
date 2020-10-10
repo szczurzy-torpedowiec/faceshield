@@ -1,0 +1,13 @@
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\bin\Debug\FaceShieldKinectModule.exe.config
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\bin\Debug\FaceShieldKinectModule.exe
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\bin\Debug\FaceShieldKinectModule.pdb
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\bin\Debug\Fleck.dll
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\bin\Debug\Microsoft.Kinect.dll
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\bin\Debug\Microsoft.Kinect.xml
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\obj\Debug\FaceShieldKinectModule.csprojAssemblyReference.cache
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\obj\Debug\FaceShieldKinectModule.csproj.CoreCompileInputs.cache
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\obj\Debug\FaceShieldKinectModule.csproj.CopyComplete
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\obj\Debug\FaceShieldKinectModule.exe
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\obj\Debug\FaceShieldKinectModule.pdb
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\obj\Debug\FaceShieldKinectModule.Properties.Resources.resources
+C:\Users\doteq\source\repos\FaceShieldKinectModule\FaceShieldKinectModule\obj\Debug\FaceShieldKinectModule.csproj.GenerateResource.cache
