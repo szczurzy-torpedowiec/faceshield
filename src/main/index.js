@@ -1,3 +1,4 @@
+/* global __static */
 'use strict'
 
 import {app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell} from 'electron'
