@@ -1,5 +1,5 @@
 <template>
-  <v-card outlined class="dashboard-control">
+  <v-card outlined class="dashboard-control-tile">
     <v-sheet
         class="px-4 py-2 d-flex align-center"
         :color="`${active ? 'green' : 'red'} white--text`"
