@@ -7,7 +7,7 @@
       Your touch rate was
     </div>
     <div class="h4 d-flex align-center justify-center">
-      1 time per hour
+      1 per hour
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
           <v-btn icon small class="ml-1" v-on="on"><v-icon>mdi-help-circle</v-icon></v-btn>
