@@ -1,60 +1,74 @@
 <template>
   <v-app>
-    <v-app-bar
+    <v-navigation-drawer
+      v-model="drawer"
       app
-      color="primary"
-      dark
+      permanent
+      :expand-on-hover="$vuetify.breakpoint.xsOnly"
     >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
+      <div class="d-flex flex-column fill-height">
+        <v-list>
+          <v-list-item to="/">
+            <v-list-item-icon>
+              <v-icon>mdi-home</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>
+              Dashboard
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/stats">
+            <v-list-item-icon>
+              <v-icon>mdi-chart-timeline-variant</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>
+              Statistics
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/gallery">
+            <v-list-item-icon>
+              <v-icon>mdi-video</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>
+              Gallery
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+        <v-spacer />
+        <v-divider />
+        <v-list>
+          <v-list-item to="/settings">
+            <v-list-item-icon>
+              <v-icon>mdi-settings</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>
+              Settings
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/about">
+            <v-list-item-icon>
+              <v-icon>mdi-information</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>
+              About
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
       </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-app-bar>
+    </v-navigation-drawer>
 
     <v-main>
-      <HelloWorld/>
+      <v-scroll-x-transition mode="out-in">
+        <router-view />
+      </v-scroll-x-transition>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
-
 export default {
   name: 'App',
-
-  components: {
-    HelloWorld,
-  },
-
   data: () => ({
-    //
+    drawer: false,
   }),
 };
 </script>
