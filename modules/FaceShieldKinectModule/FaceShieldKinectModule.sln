@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceShieldKinectModule", "FaceShieldKinectModule\FaceShieldKinectModule.csproj", "{D2BED9A6-08FB-499D-A76D-E000830E4BAE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2BED9A6-08FB-499D-A76D-E000830E4BAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2BED9A6-08FB-499D-A76D-E000830E4BAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2BED9A6-08FB-499D-A76D-E000830E4BAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2BED9A6-08FB-499D-A76D-E000830E4BAE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F97D70B8-2E9D-436E-A04C-430B8363D5EC}
+	EndGlobalSection
+EndGlobal
