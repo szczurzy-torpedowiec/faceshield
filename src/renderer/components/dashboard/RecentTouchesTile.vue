@@ -15,7 +15,7 @@
     <v-select
       dense
       filled
-      :items="['15 minutes', '30 minutes', '1 hour', '2 hours']"
+      :items="['15 minutes', '30 minutes', '1 hour', '2 hours', '4 hours', '8 hours']"
       hide-details
     />
   </v-card>
