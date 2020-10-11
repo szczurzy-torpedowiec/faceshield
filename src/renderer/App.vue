@@ -38,7 +38,7 @@
         <v-list>
           <v-list-item to="/settings">
             <v-list-item-icon>
-              <v-icon>mdi-settings</v-icon>
+              <v-icon>mdi-cog</v-icon>
             </v-list-item-icon>
             <v-list-item-title>
               Settings
