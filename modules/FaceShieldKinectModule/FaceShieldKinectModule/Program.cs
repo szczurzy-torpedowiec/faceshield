@@ -15,6 +15,7 @@ namespace FaceShieldKinectModule
         static List<IWebSocketConnection> _clients = new List<IWebSocketConnection>();
         static Skeleton[] _skeletons = new Skeleton[6];
         static CoordinateMapper _coordinateMapper;
+        static KinectSensor sensor;
 
         static void Main(string[] args)
         {
@@ -41,14 +42,18 @@ namespace FaceShieldKinectModule
 
                 socket.OnMessage = message =>
                 {
+                    string[] msgArgs = message.Split(':');
+                    if (msgArgs[0] == "tilt" && Convert.ToInt32(msgArgs[1]) >= sensor.MinElevationAngle && Convert.ToInt32(msgArgs[1]) <= sensor.MaxElevationAngle)
+                    {
+                        sensor.ElevationAngle = Convert.ToInt32(msgArgs[1]);
+                    }
                 };
             });
         }
 
         private static void InitilizeKinect()
         {
-            var sensor = KinectSensor.KinectSensors.SingleOrDefault();
-
+            sensor = KinectSensor.KinectSensors.SingleOrDefault();
             if (sensor != null)
             {
                 sensor.ColorStream.Enable();
