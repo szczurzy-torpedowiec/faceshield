@@ -13,6 +13,15 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       mainProcessFile: 'src/main/index.js',
+      builderOptions: {
+        appId: 'io.github.doteq.faceshield',
+        productName: 'Face Shield',
+        nsis: {
+          oneClick: false,
+          allowToChangeInstallationDirectory: true,
+          artifactName: '${productName} v${version} setup.${ext}'
+        },
+      },
     },
   },
 };
