@@ -16,17 +16,25 @@ namespace FaceShieldKinectModule
         static Skeleton[] _skeletons = new Skeleton[6];
         static CoordinateMapper _coordinateMapper;
         static KinectSensor sensor;
+        static int port;
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Please enter a port number");
+                return 1;
+            }
+            port = Convert.ToInt32(args[0]);
             InitializeConnection();
             InitilizeKinect();
             initTaskbarIcon();
             Application.Run();
+            return 0;
         }
         private static void InitializeConnection()
         {
-            var server = new WebSocketServer("ws://0.0.0.0:8181");
+            var server = new WebSocketServer("ws://0.0.0.0:" + port);
 
             server.Start(socket =>
             {
