@@ -56,29 +56,30 @@
       <v-card-title>
         Autostart
       </v-card-title>
-      <v-list>
-        <v-list-item @click="autostartEnabled = !autostartEnabled" >
+      <v-progress-circular indeterminate class="mx-auto my-4 d-block" :size="48" color="primary" v-if="autostartConfig === null" />
+      <v-list v-else>
+        <v-list-item @click="toggleAutostartEnabled">
           <v-list-item-title>
             Launch app on system startup
           </v-list-item-title>
           <v-list-item-action>
-            <v-switch v-model="autostartEnabled" readonly />
+            <v-switch :input-value="autostartConfig.enabled" readonly />
           </v-list-item-action>
         </v-list-item>
-        <v-list-item @click="trackingOnStartup = !trackingOnStartup" :disabled="!autostartEnabled" >
+        <v-list-item @click="toggleAutostartStartTracking" :disabled="!autostartConfig.enabled" >
           <v-list-item-title>
             Start tracking on startup
           </v-list-item-title>
           <v-list-item-action>
-            <v-switch v-model="trackingOnStartup" readonly :disabled="!autostartEnabled" />
+            <v-switch :input-value="autostartConfig.startTracking" readonly :disabled="!autostartConfig.enabled" />
           </v-list-item-action>
         </v-list-item>
-        <v-list-item @click="launchMinimised = !launchMinimised" :disabled="!autostartEnabled" >
+        <v-list-item @click="toggleAutostartMinimise" :disabled="!autostartConfig.enabled" >
           <v-list-item-title>
             Launch minimised
           </v-list-item-title>
           <v-list-item-action>
-            <v-switch v-model="launchMinimised" readonly :disabled="!autostartEnabled" />
+            <v-switch :input-value="autostartConfig.minimise" readonly :disabled="!autostartConfig.enabled" />
           </v-list-item-action>
         </v-list-item>
       </v-list>
@@ -93,10 +94,15 @@
     data: () => ({
       deviceSelectItems: ['Kinect'],
       selectedDevice: '',
-      autostartEnabled: false,
-      trackingOnStartup: false,
-      launchMinimised: false,
     }),
+    watch: {
+      'autostartConfig.startTracking': {
+        handler (value) {
+          console.log(value, JSON.stringify(this.autostartConfig))
+        },
+        immediate: true,
+      }
+    },
     components: {
       ControlTile,
     },
@@ -106,6 +112,29 @@
           return 'Face Shield only works with Kinect v1 drivers. Make sure you have installed correct one.'
         }
         return ''
+      },
+      autostartConfig () {
+        return this.$store.state.autostartConfig;
+      }
+    },
+    methods: {
+      toggleAutostartEnabled () {
+        this.$comm.setAutostartConfig({
+          ...this.autostartConfig,
+          enabled: !this.autostartConfig.enabled,
+        })
+      },
+      toggleAutostartStartTracking () {
+        this.$comm.setAutostartConfig({
+          ...this.autostartConfig,
+          startTracking: !this.autostartConfig.startTracking,
+        })
+      },
+      toggleAutostartMinimise () {
+        this.$comm.setAutostartConfig({
+          ...this.autostartConfig,
+          minimise: !this.autostartConfig.minimise,
+        })
       }
     }
   }

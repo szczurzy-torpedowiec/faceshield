@@ -5,6 +5,9 @@ import {app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell} from 'elec
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import path from 'path'
+import store from './store';
+import RendererCommunication from './renderer-communication';
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -12,6 +15,8 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 let win
 let overlayWin
 let tray
+
+const rendererCommunication = new RendererCommunication(store);
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -27,7 +32,8 @@ function createWindow() {
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
+      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      preload: path.join(__dirname, 'rendererPreload.js')
     }
   })
 
