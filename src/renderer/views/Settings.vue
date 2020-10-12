@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 py-2 dashboard">
+  <div class="px-4 py-2 settings">
     <h1>Settings</h1>
     <v-card>
       <v-card-title>Device configuration</v-card-title>

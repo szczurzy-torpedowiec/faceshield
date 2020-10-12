@@ -1,5 +1,5 @@
 <template>
-  <v-card outlined class="dashboard-control-tile">
+  <v-card outlined class="control-tile">
     <v-sheet
         class="px-4 py-2 d-flex align-center"
         :color="`${active ? 'green' : 'red'} white--text`"
@@ -49,3 +49,9 @@ export default {
   }
 };
 </script>
+
+<style lang="scss">
+  .control-tile {
+    grid-area: control;
+  }
+</style>
