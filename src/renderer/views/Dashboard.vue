@@ -31,6 +31,10 @@
       "recent-touches"
       "touches-per-hour";
 
+    .control-tile {
+      grid-area: control;
+    }
+
     .dashboard-recent-touches-tile {
       grid-area: recent-touches;
     }

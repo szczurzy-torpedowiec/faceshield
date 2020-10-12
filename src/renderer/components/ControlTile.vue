@@ -49,9 +49,3 @@ export default {
   }
 };
 </script>
-
-<style lang="scss">
-  .control-tile {
-    grid-area: control;
-  }
-</style>
