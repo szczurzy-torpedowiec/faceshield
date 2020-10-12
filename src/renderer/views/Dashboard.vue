@@ -7,7 +7,7 @@
 </template>
 
 <script>
-  import ControlTile from "../components/dashboard/ControlTile";
+  import ControlTile from "../components/ControlTile";
   import RecentTouchesTile from "../components/dashboard/RecentTouchesTile";
   import TouchesPerHourTile from "../components/dashboard/TouchesPerHourTile"
 
@@ -31,7 +31,7 @@
       "recent-touches"
       "touches-per-hour";
 
-    .dashboard-control-tile {
+    .control-tile {
       grid-area: control;
     }
 
