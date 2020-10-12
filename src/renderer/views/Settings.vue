@@ -1,7 +1,7 @@
 <template>
   <div class="px-4 py-2 settings">
-    <control-tile class="mb-4"/>
-    <v-card outlined>
+    <control-tile/>
+    <v-card outlined class="mt-4">
       <v-card-title>Device configuration</v-card-title>
       <v-row class="px-4">
         <v-col>
@@ -52,6 +52,37 @@
         </v-col>
       </v-row>
     </v-card>
+    <v-card outlined class="mt-4">
+      <v-card-title>
+        Autostart
+      </v-card-title>
+      <v-list>
+        <v-list-item @click="autostartEnabled = !autostartEnabled" >
+          <v-list-item-title>
+            Launch app on system startup
+          </v-list-item-title>
+          <v-list-item-action>
+            <v-switch v-model="autostartEnabled" readonly />
+          </v-list-item-action>
+        </v-list-item>
+        <v-list-item @click="trackingOnStartup = !trackingOnStartup" :disabled="!autostartEnabled" >
+          <v-list-item-title>
+            Start tracking on startup
+          </v-list-item-title>
+          <v-list-item-action>
+            <v-switch v-model="trackingOnStartup" readonly :disabled="!autostartEnabled" />
+          </v-list-item-action>
+        </v-list-item>
+        <v-list-item @click="launchMinimised = !launchMinimised" :disabled="!autostartEnabled" >
+          <v-list-item-title>
+            Launch minimised
+          </v-list-item-title>
+          <v-list-item-action>
+            <v-switch v-model="launchMinimised" readonly :disabled="!autostartEnabled" />
+          </v-list-item-action>
+        </v-list-item>
+      </v-list>
+    </v-card>
   </div>
 </template>
 
@@ -62,6 +93,9 @@
     data: () => ({
       deviceSelectItems: ['Kinect'],
       selectedDevice: '',
+      autostartEnabled: false,
+      trackingOnStartup: false,
+      launchMinimised: false,
     }),
     components: {
       ControlTile,
