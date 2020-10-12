@@ -9,6 +9,12 @@ module.exports = {
       filename: 'index.html',
       title: 'Face Shield',
     },
+    overlay: {
+      entry: 'src/overlay/index.js',
+      template: 'public/index.html',
+      filename: 'overlay.html',
+      title: 'Face Shield Overlay'
+    }
   },
   pluginOptions: {
     electronBuilder: {

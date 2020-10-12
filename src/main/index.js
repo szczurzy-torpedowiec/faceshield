@@ -10,6 +10,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win
+let overlayWin
 let tray
 
 // Scheme must be registered before the app is ready
@@ -73,6 +74,24 @@ function createTray() {
   })
 }
 
+function createOverlayWindow() {
+  overlayWin = new BrowserWindow({
+    frame: false,
+    transparent: true,
+    fullscreen: true,
+  })
+  overlayWin.loadFile(path.join(__static, 'overlay.html'))
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    overlayWin.loadURL(new URL('/overlay.html', process.env.WEBPACK_DEV_SERVER_URL).toString())
+  } else {
+    createProtocol('app')
+    overlayWin.loadURL('app://./overlay.html')
+  }
+  overlayWin.setAlwaysOnTop( true, 'status' )
+  overlayWin.setIgnoreMouseEvents(true)
+  overlayWin.setSkipTaskbar(true)
+}
+
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
@@ -104,6 +123,7 @@ app.on('ready', async () => {
   }
   createWindow()
   createTray()
+  createOverlayWindow()
 })
 
 // Exit cleanly on request from parent process in development mode.
