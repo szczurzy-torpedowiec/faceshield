@@ -18,7 +18,7 @@
         </v-btn>
       </v-btn-toggle>
       <div class="d-flex flex-column flex-md-row">
-        <div class="d-flex flex-column mx-4 mr-md-0 mb-4 grow">
+        <div class="d-flex flex-column mx-4 mr-md-0 mb-4 just-grow">
           <v-fade-transition mode="out-in">
             <div v-if="selectedDevice === 'kinect'">
               <v-alert
@@ -30,7 +30,6 @@
                 Face Shield only works with Kinect v1 drivers. Make sure you have installed correct one
               </v-alert>
             </div>
-            <h4>TODO device specific config goes here</h4>
           </v-fade-transition>
         </div>
         <div class="shrink mx-4 align-self-center mb-4">
@@ -184,6 +183,10 @@
 <style lang="scss">
   .settings {
     max-width: 800px;
+
+    .just-grow {
+      flex-grow: 1;
+    }
 
     .preview-close {
       position: absolute;
