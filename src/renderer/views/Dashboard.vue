@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 py-2 dashboard">
+  <div class="px-4 py-2 mx-auto dashboard">
     <control-tile />
     <recent-touches-tile />
     <touches-per-hour-tile />
@@ -22,6 +22,7 @@
 
 <style lang="scss">
   .dashboard {
+    max-width: 800px;
     display: grid;
     grid-gap: 16px;
     grid-template-rows: auto auto auto;

@@ -4,7 +4,7 @@
       v-model="drawer"
       app
       permanent
-      :expand-on-hover="$vuetify.breakpoint.xsOnly"
+      :expand-on-hover="$vuetify.breakpoint.smAndDown"
     >
       <div class="d-flex flex-column fill-height">
         <v-list>
