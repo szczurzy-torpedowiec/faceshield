@@ -19,7 +19,10 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       mainProcessFile: 'src/main/index.js',
-      preload: { rendererPreload: 'src/renderer/preload.js' },
+      preload: {
+        rendererPreload: 'src/renderer/preload.js',
+        overlayPreload: 'src/overlay/preload.js',
+      },
       builderOptions: {
         appId: 'io.github.doteq.faceshield',
         productName: 'Face Shield',

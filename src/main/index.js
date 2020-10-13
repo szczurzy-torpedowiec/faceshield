@@ -7,6 +7,7 @@ import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import path from 'path'
 import store from './store';
 import RendererCommunication from './renderer-communication';
+import OverlayCommunication from './overlay-communication';
 import parseArgs from 'minimist';
 
 const argv = parseArgs(process.argv.slice(1))
@@ -39,6 +40,8 @@ rendererCommunication.on('start-tracking', () => {
 rendererCommunication.on('pause-tracking', () => {
   trackingActive = false;
 });
+
+const overlayCommunication = new OverlayCommunication();
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -107,6 +110,12 @@ function createOverlayWindow() {
     frame: false,
     transparent: true,
     fullscreen: true,
+    webPreferences: {
+      // Use pluginOptions.nodeIntegration, leave this alone
+      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      preload: path.join(__dirname, 'overlayPreload.js')
+    },
   })
   overlayWin.loadFile(path.join(__static, 'overlay.html'))
   if (process.env.WEBPACK_DEV_SERVER_URL) {

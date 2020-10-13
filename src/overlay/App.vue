@@ -3,10 +3,9 @@
     id="app"
     :class="{
       'touching': touching,
-      'visible': visible,
+      'visible': visible
     }"
   >
-    {{ state }}
     <div class="light">
       <div class="alert">
         Face touching detected!
@@ -20,15 +19,31 @@
 export default {
   name: 'App',
   data: () => ({
-    touching: true,
+    touching: false,
     visible: false,
   }),
+  created() {
+    window.ipcRenderer.on('set-not-touching', () => {
+      this.visible = false;
+    });
+
+    window.ipcRenderer.on('set-about-to-touch', () => {
+      this.visible = true;
+      this.touching = false;
+    });
+
+    window.ipcRenderer.on('set-touching', () => {
+      this.visible = true;
+      this.touching = true;
+    });
+  },
 };
 </script>
 
 <style lang="scss">
   body {
     margin: 0;
+    overflow: hidden;
   }
 
   #app {
@@ -84,9 +99,9 @@ export default {
   .alert {
     margin-top: 128px;
     padding: 32px 48px;
-    border: 2px solid #FF312E;
+    border: 2px solid #FF312EBB;
     border-radius: 4px;
-    background-color: #fff9;
+    background: linear-gradient(0deg, #fff9 0%, #fffb 30%, #fffb 70%, #fff9 100%);
     color: #FF312E;
     font-size: 2em;
     font-family: 'Roboto', sans-serif;
