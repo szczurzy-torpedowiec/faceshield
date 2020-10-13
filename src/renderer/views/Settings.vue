@@ -18,7 +18,7 @@
         </v-btn>
       </v-btn-toggle>
       <div class="d-flex flex-column flex-md-row">
-        <div class="d-flex flex-column mx-4 mr-md-0 mb-4">
+        <div class="d-flex flex-column mx-4 mr-md-0 mb-4 grow">
           <v-fade-transition mode="out-in">
             <div v-if="selectedDevice === 'kinect'">
               <v-alert
