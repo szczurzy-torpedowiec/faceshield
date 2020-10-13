@@ -7,16 +7,27 @@ import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import path from 'path'
 import store from './store';
 import RendererCommunication from './renderer-communication';
+import parseArgs from 'minimist';
 
+const argv = parseArgs(process.argv.slice(1))
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win
-let overlayWin
-let tray
+let win = null
+let overlayWin = null
+let tray = null
 
 const rendererCommunication = new RendererCommunication(store);
+rendererCommunication.on('autostart-config-changed', (config) => {
+  app.setLoginItemSettings({
+    openAtLogin: config.enabled,
+    openAsHidden: config.minimise,
+    args: [
+      '--autostart',
+    ],
+  })
+});
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -34,7 +45,7 @@ function createWindow() {
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
       preload: path.join(__dirname, 'rendererPreload.js')
-    }
+    },
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -98,39 +109,45 @@ function createOverlayWindow() {
   overlayWin.setSkipTaskbar(true)
 }
 
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    // app.quit()
-  }
+app.on('second-instance', () => {
+  if (win === null) createWindow()
+  else win.focus()
 })
 
-app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (win === null) {
-    createWindow()
-  }
-})
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      await installExtension(VUEJS_DEVTOOLS)
-    } catch (e) {
-      console.error('Vue Devtools failed to install:', e.toString())
+const instanceLock = app.requestSingleInstanceLock()
+if (instanceLock) {
+  app.on('ready', async () => {
+    if (isDevelopment && !process.env.IS_TEST) {
+      // Install Vue Devtools
+      try {
+        await installExtension(VUEJS_DEVTOOLS)
+      } catch (e) {
+        console.error('Vue Devtools failed to install:', e.toString())
+      }
     }
-  }
-  createWindow()
-  createTray()
-  createOverlayWindow()
-})
+
+    createTray()
+
+    const loginItemSettings = app.getLoginItemSettings({
+      args: [
+        '--autostart',
+      ],
+    });
+    if (process.platform === 'darwin') store.set('autostart.minimise', loginItemSettings.openAsHidden);
+    if (argv.autostart) {
+      if (store.get('autostart.startTracking')) {
+        // TODO: Start tracking
+      }
+      if (!store.get('autostart.minimise')) createWindow()
+    } else {
+      createWindow()
+    }
+
+    createOverlayWindow()
+  })
+} else {
+  app.quit()
+}
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
