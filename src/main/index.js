@@ -18,7 +18,12 @@ let win = null
 let overlayWin = null
 let tray = null
 
-const rendererCommunication = new RendererCommunication(store);
+let trackingActive = false;
+
+const rendererCommunication = new RendererCommunication({
+  store,
+  getTrackingActive: () => trackingActive,
+});
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
     openAtLogin: config.enabled,
@@ -27,6 +32,12 @@ rendererCommunication.on('autostart-config-changed', (config) => {
       '--autostart',
     ],
   })
+});
+rendererCommunication.on('start-tracking', () => {
+  trackingActive = true;
+});
+rendererCommunication.on('pause-tracking', () => {
+  trackingActive = false;
 });
 
 // Scheme must be registered before the app is ready
@@ -136,6 +147,7 @@ if (instanceLock) {
     if (process.platform === 'darwin') store.set('autostart.minimise', loginItemSettings.openAsHidden);
     if (argv.autostart) {
       if (store.get('autostart.startTracking')) {
+        trackingActive = true
         // TODO: Start tracking
       }
       if (!store.get('autostart.minimise')) createWindow()

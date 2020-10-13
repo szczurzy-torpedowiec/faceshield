@@ -95,14 +95,6 @@
       deviceSelectItems: ['Kinect'],
       selectedDevice: '',
     }),
-    watch: {
-      'autostartConfig.startTracking': {
-        handler (value) {
-          console.log(value, JSON.stringify(this.autostartConfig))
-        },
-        immediate: true,
-      }
-    },
     components: {
       ControlTile,
     },
