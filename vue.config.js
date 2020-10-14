@@ -1,6 +1,6 @@
 module.exports = {
-  "transpileDependencies": [
-    "vuetify"
+  transpileDependencies: [
+    'vuetify',
   ],
   pages: {
     index: {
@@ -13,8 +13,8 @@ module.exports = {
       entry: 'src/overlay/index.js',
       template: 'public/index.html',
       filename: 'overlay.html',
-      title: 'Face Shield Overlay'
-    }
+      title: 'Face Shield Overlay',
+    },
   },
   pluginOptions: {
     electronBuilder: {
@@ -29,7 +29,8 @@ module.exports = {
         nsis: {
           oneClick: false,
           allowToChangeInstallationDirectory: true,
-          artifactName: '${productName} v${version} setup.${ext}'
+          // eslint-disable-next-line no-template-curly-in-string
+          artifactName: '${productName} v${version} setup.${ext}',
         },
       },
     },

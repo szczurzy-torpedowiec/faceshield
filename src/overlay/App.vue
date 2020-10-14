@@ -16,28 +16,28 @@
 </template>
 
 <script>
-export default {
-  name: 'App',
-  data: () => ({
-    touching: false,
-    visible: false,
-  }),
-  created() {
-    window.ipcRenderer.on('set-not-touching', () => {
-      this.visible = false;
-    });
+  export default {
+    name: 'App',
+    data: () => ({
+      touching: false,
+      visible: false,
+    }),
+    created() {
+      window.ipcRenderer.on('set-not-touching', () => {
+        this.visible = false;
+      });
 
-    window.ipcRenderer.on('set-about-to-touch', () => {
-      this.visible = true;
-      this.touching = false;
-    });
+      window.ipcRenderer.on('set-about-to-touch', () => {
+        this.visible = true;
+        this.touching = false;
+      });
 
-    window.ipcRenderer.on('set-touching', () => {
-      this.visible = true;
-      this.touching = true;
-    });
-  },
-};
+      window.ipcRenderer.on('set-touching', () => {
+        this.visible = true;
+        this.touching = true;
+      });
+    },
+  };
 </script>
 
 <style lang="scss">
