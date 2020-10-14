@@ -9,12 +9,20 @@
     <div class="h4 d-flex align-center justify-center">
       1 per hour
       <v-menu offset-y>
-        <template v-slot:activator="{ on }">
-          <v-btn icon small class="ml-1" v-on="on"><v-icon>mdi-help-circle</v-icon></v-btn>
+        <template #activator="{ on }">
+          <v-btn
+            icon
+            small
+            class="ml-1"
+            v-on="on"
+          >
+            <v-icon>mdi-help-circle</v-icon>
+          </v-btn>
         </template>
         <v-card max-width="350">
           <v-card-text>
-            This metric shows the number of touches, divided by the time, during which the tracking was active and your face was detected.
+            This metric shows the number of touches, divided by the time,
+            during which the tracking was active and your face was detected.
           </v-card-text>
         </v-card>
       </v-menu>

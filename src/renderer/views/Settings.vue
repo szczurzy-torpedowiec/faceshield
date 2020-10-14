@@ -1,19 +1,33 @@
 <template>
   <div class="px-4 py-2 mx-auto settings">
-    <control-tile/>
-    <v-card outlined class="mt-4 d-flex flex-column">
+    <control-tile />
+    <v-card
+      outlined
+      class="mt-4 d-flex flex-column"
+    >
       <v-card-title>Device configuration</v-card-title>
-      <v-btn-toggle mandatory class="align-self-center mb-4" dense v-model="selectedDevice">
+      <v-btn-toggle
+        v-model="selectedDevice"
+        mandatory
+        class="align-self-center mb-4"
+        dense
+      >
         <v-btn value="kinect">
-          <v-icon left>mdi-microsoft-xbox</v-icon>
+          <v-icon left>
+            mdi-microsoft-xbox
+          </v-icon>
           Kinect
         </v-btn>
         <v-btn value="webcam">
-          <v-icon left>mdi-webcam</v-icon>
+          <v-icon left>
+            mdi-webcam
+          </v-icon>
           Webcam
         </v-btn>
         <v-btn value="mobile">
-          <v-icon left>mdi-cellphone</v-icon>
+          <v-icon left>
+            mdi-cellphone
+          </v-icon>
           Mobile
         </v-btn>
       </v-btn-toggle>
@@ -27,21 +41,51 @@
                 outlined
                 class="mb-4"
               >
-                Face Shield only works with Kinect v1 drivers. Make sure you have installed correct one
+                Face Shield only works with Kinect v1 drivers.
+                Make sure you have installed correct one
               </v-alert>
             </div>
           </v-fade-transition>
         </div>
         <div class="shrink mx-4 align-self-center mb-4">
-          <v-card outlined width="320">
-            <canvas width="320" height="240" /><!-- TODO: Set height dynamically -->
-            <v-btn class="preview-close" icon color="primary">
+          <v-card
+            outlined
+            width="320"
+          >
+            <canvas
+              width="320"
+              height="240"
+            /><!-- TODO: Set height dynamically -->
+            <v-btn
+              class="preview-close"
+              icon
+              color="primary"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
-            <v-skeleton-loader type="image@2" height="240" tile />
-            <v-sheet tile color="grey darken-3" height="240" class="d-flex flex-column align-center justify-center">
-              <v-icon :size="96" dark>mdi-camera</v-icon>
-              <v-btn color="primary" class="mt-2">Show preview</v-btn>
+            <v-skeleton-loader
+              type="image@2"
+              height="240"
+              tile
+            />
+            <v-sheet
+              tile
+              color="grey darken-3"
+              height="240"
+              class="d-flex flex-column align-center justify-center"
+            >
+              <v-icon
+                :size="96"
+                dark
+              >
+                mdi-camera
+              </v-icon>
+              <v-btn
+                color="primary"
+                class="mt-2"
+              >
+                Show preview
+              </v-btn>
             </v-sheet>
             <v-divider />
             <v-alert
@@ -107,34 +151,60 @@
         </div>
       </div>
     </v-card>
-    <v-card outlined class="mt-4">
+    <v-card
+      outlined
+      class="mt-4"
+    >
       <v-card-title>
         Autostart
       </v-card-title>
-      <v-progress-circular indeterminate class="mx-auto my-4 d-block" :size="48" color="primary" v-if="autostartConfig === null" />
+      <v-progress-circular
+        v-if="autostartConfig === null"
+        indeterminate
+        class="mx-auto my-4 d-block"
+        :size="48"
+        color="primary"
+      />
       <v-list v-else>
         <v-list-item @click="toggleAutostartEnabled">
           <v-list-item-title>
             Launch app on system startup
           </v-list-item-title>
           <v-list-item-action>
-            <v-switch :input-value="autostartConfig.enabled" readonly />
+            <v-switch
+              :input-value="autostartConfig.enabled"
+              readonly
+            />
           </v-list-item-action>
         </v-list-item>
-        <v-list-item @click="toggleAutostartStartTracking" :disabled="!autostartConfig.enabled" >
+        <v-list-item
+          :disabled="!autostartConfig.enabled"
+          @click="toggleAutostartStartTracking"
+        >
           <v-list-item-title>
             Start tracking on startup
           </v-list-item-title>
           <v-list-item-action>
-            <v-switch :input-value="autostartConfig.startTracking" readonly :disabled="!autostartConfig.enabled" />
+            <v-switch
+              :input-value="autostartConfig.startTracking"
+              readonly
+              :disabled="!autostartConfig.enabled"
+            />
           </v-list-item-action>
         </v-list-item>
-        <v-list-item @click="toggleAutostartMinimise" :disabled="!autostartConfig.enabled" >
+        <v-list-item
+          :disabled="!autostartConfig.enabled"
+          @click="toggleAutostartMinimise"
+        >
           <v-list-item-title>
             Launch minimised
           </v-list-item-title>
           <v-list-item-action>
-            <v-switch :input-value="autostartConfig.minimise" readonly :disabled="!autostartConfig.enabled" />
+            <v-switch
+              :input-value="autostartConfig.minimise"
+              readonly
+              :disabled="!autostartConfig.enabled"
+            />
           </v-list-item-action>
         </v-list-item>
       </v-list>
@@ -143,41 +213,41 @@
 </template>
 
 <script>
-  import ControlTile from "../components/ControlTile";
+  import ControlTile from '../components/ControlTile.vue';
 
   export default {
-    data: () => ({
-      selectedDevice: 'kinect',
-    }),
     components: {
       ControlTile,
     },
+    data: () => ({
+      selectedDevice: 'kinect',
+    }),
     computed: {
-      autostartConfig () {
+      autostartConfig() {
         return this.$store.state.autostartConfig;
-      }
+      },
     },
     methods: {
-      toggleAutostartEnabled () {
+      toggleAutostartEnabled() {
         this.$comm.setAutostartConfig({
           ...this.autostartConfig,
           enabled: !this.autostartConfig.enabled,
-        })
+        });
       },
-      toggleAutostartStartTracking () {
+      toggleAutostartStartTracking() {
         this.$comm.setAutostartConfig({
           ...this.autostartConfig,
           startTracking: !this.autostartConfig.startTracking,
-        })
+        });
       },
-      toggleAutostartMinimise () {
+      toggleAutostartMinimise() {
         this.$comm.setAutostartConfig({
           ...this.autostartConfig,
           minimise: !this.autostartConfig.minimise,
-        })
-      }
-    }
-  }
+        });
+      },
+    },
+  };
 </script>
 
 <style lang="scss">

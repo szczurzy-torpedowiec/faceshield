@@ -1,23 +1,24 @@
 /* global __static */
-'use strict'
 
-import {app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell} from 'electron'
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import path from 'path'
+import {
+  app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell,
+} from 'electron';
+import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
+import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
+import path from 'path';
+import parseArgs from 'minimist';
 import store from './store';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
-import parseArgs from 'minimist';
 
-const argv = parseArgs(process.argv.slice(1))
-const isDevelopment = process.env.NODE_ENV !== 'production'
+const argv = parseArgs(process.argv.slice(1));
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win = null
-let overlayWin = null
-let tray = null
+let win = null;
+let overlayWin = null;
+let tray = null;
 
 let trackingActive = false;
 
@@ -32,7 +33,7 @@ rendererCommunication.on('autostart-config-changed', (config) => {
     args: [
       '--autostart',
     ],
-  })
+  });
 });
 rendererCommunication.on('start-tracking', () => {
   trackingActive = true;
@@ -45,8 +46,8 @@ const overlayCommunication = new OverlayCommunication();
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { secure: true, standard: true } }
-])
+  { scheme: 'app', privileges: { secure: true, standard: true } },
+]);
 
 function createWindow() {
   // Create the browser window.
@@ -56,53 +57,54 @@ function createWindow() {
     height: 680,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration
+      // for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      preload: path.join(__dirname, 'rendererPreload.js')
+      preload: path.join(__dirname, 'rendererPreload.js'),
     },
-  })
+  });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
+    if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
-    createProtocol('app')
+    createProtocol('app');
     // Load the index.html when not in development
-    win.loadURL('app://./index.html')
+    win.loadURL('app://./index.html');
   }
 
   win.on('closed', () => {
-    win = null
-  })
+    win = null;
+  });
 }
 
 function createTray() {
-  tray = new Tray(nativeImage.createFromPath(path.join(__static, 'icon-32.png'))) // TODO: add proper icon
+  tray = new Tray(nativeImage.createFromPath(path.join(__static, 'icon-32.png'))); // TODO: add proper icon
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Source code on GitHub',
       type: 'normal',
-      click() { shell.openExternal('https://github.com/doteq/faceshield') }
+      click() { shell.openExternal('https://github.com/doteq/faceshield'); },
     },
     {
-      type: 'separator'
+      type: 'separator',
     },
     {
       label: 'Quit Face Shield',
       type: 'normal',
-      role: 'quit'
-    }
-  ])
-  tray.setToolTip('Face Shield')
-  tray.setContextMenu(contextMenu)
+      role: 'quit',
+    },
+  ]);
+  tray.setToolTip('Face Shield');
+  tray.setContextMenu(contextMenu);
   tray.addListener('click', () => {
     if (win === null) {
-      createWindow()
+      createWindow();
     } else {
-      win.focus()
+      win.focus();
     }
-  })
+  });
 }
 
 function createOverlayWindow() {
@@ -112,41 +114,42 @@ function createOverlayWindow() {
     fullscreen: true,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration
+      // for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      preload: path.join(__dirname, 'overlayPreload.js')
+      preload: path.join(__dirname, 'overlayPreload.js'),
     },
-  })
-  overlayWin.loadFile(path.join(__static, 'overlay.html'))
+  });
+  overlayWin.loadFile(path.join(__static, 'overlay.html'));
   if (process.env.WEBPACK_DEV_SERVER_URL) {
-    overlayWin.loadURL(new URL('/overlay.html', process.env.WEBPACK_DEV_SERVER_URL).toString())
+    overlayWin.loadURL(new URL('/overlay.html', process.env.WEBPACK_DEV_SERVER_URL).toString());
   } else {
-    createProtocol('app')
-    overlayWin.loadURL('app://./overlay.html')
+    createProtocol('app');
+    overlayWin.loadURL('app://./overlay.html');
   }
-  overlayWin.setAlwaysOnTop( true, 'status' )
-  overlayWin.setIgnoreMouseEvents(true)
-  overlayWin.setSkipTaskbar(true)
+  overlayWin.setAlwaysOnTop(true, 'status');
+  overlayWin.setIgnoreMouseEvents(true);
+  overlayWin.setSkipTaskbar(true);
 }
 
 app.on('second-instance', () => {
-  if (win === null) createWindow()
-  else win.focus()
-})
+  if (win === null) createWindow();
+  else win.focus();
+});
 
-const instanceLock = app.requestSingleInstanceLock()
+const instanceLock = app.requestSingleInstanceLock();
 if (instanceLock) {
   app.on('ready', async () => {
     if (isDevelopment && !process.env.IS_TEST) {
       // Install Vue Devtools
       try {
-        await installExtension(VUEJS_DEVTOOLS)
+        await installExtension(VUEJS_DEVTOOLS);
       } catch (e) {
-        console.error('Vue Devtools failed to install:', e.toString())
+        console.error('Vue Devtools failed to install:', e.toString());
       }
     }
 
-    createTray()
+    createTray();
 
     const loginItemSettings = app.getLoginItemSettings({
       args: [
@@ -156,18 +159,18 @@ if (instanceLock) {
     if (process.platform === 'darwin') store.set('autostart.minimise', loginItemSettings.openAsHidden);
     if (argv.autostart) {
       if (store.get('autostart.startTracking')) {
-        trackingActive = true
+        trackingActive = true;
         // TODO: Start tracking
       }
-      if (!store.get('autostart.minimise')) createWindow()
+      if (!store.get('autostart.minimise')) createWindow();
     } else {
-      createWindow()
+      createWindow();
     }
 
-    createOverlayWindow()
-  })
+    createOverlayWindow();
+  });
 } else {
-  app.quit()
+  app.quit();
 }
 
 // Exit cleanly on request from parent process in development mode.
@@ -175,12 +178,12 @@ if (isDevelopment) {
   if (process.platform === 'win32') {
     process.on('message', (data) => {
       if (data === 'graceful-exit') {
-        app.quit()
+        app.quit();
       }
-    })
+    });
   } else {
     process.on('SIGTERM', () => {
-      app.quit()
-    })
+      app.quit();
+    });
   }
 }

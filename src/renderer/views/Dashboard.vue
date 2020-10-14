@@ -7,17 +7,17 @@
 </template>
 
 <script>
-  import ControlTile from "../components/ControlTile";
-  import RecentTouchesTile from "../components/dashboard/RecentTouchesTile";
-  import TouchesPerHourTile from "../components/dashboard/TouchesPerHourTile"
+  import ControlTile from '../components/ControlTile.vue';
+  import RecentTouchesTile from '../components/dashboard/RecentTouchesTile.vue';
+  import TouchesPerHourTile from '../components/dashboard/TouchesPerHourTile.vue';
 
   export default {
     components: {
       ControlTile,
       RecentTouchesTile,
       TouchesPerHourTile,
-    }
-  }
+    },
+  };
 </script>
 
 <style lang="scss">

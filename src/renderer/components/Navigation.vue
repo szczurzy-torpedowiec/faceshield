@@ -1,8 +1,8 @@
 <template>
   <v-navigation-drawer
-      app
-      permanent
-      :expand-on-hover="$vuetify.breakpoint.smAndDown"
+    app
+    permanent
+    :expand-on-hover="$vuetify.breakpoint.smAndDown"
   >
     <div class="d-flex flex-column fill-height">
       <v-list>
