@@ -1,5 +1,10 @@
 module.exports = {
   root: true,
+  ignorePatterns: [
+    'dist',
+    'dist_electron',
+    'node_modules',
+  ],
   env: {
     node: true,
   },
