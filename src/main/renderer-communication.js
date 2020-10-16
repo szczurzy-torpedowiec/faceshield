@@ -6,6 +6,7 @@ export default class RendererCommunication extends EventEmitter {
     super();
     this.store = options.store;
     this.getTrackingActive = options.getTrackingActive;
+
     ipcMain.handle('get-autostart-config', () => this.store.get('autostart'));
     ipcMain.on('set-autostart-config', (event, config) => {
       this.store.set('autostart', config);
@@ -22,5 +23,9 @@ export default class RendererCommunication extends EventEmitter {
       event.sender.send('tracking-active-changed', false);
       this.emit('pause-tracking');
     });
+  }
+
+  updatePreview(win, string) {
+    win.webContents.send('update-preview', string);
   }
 }

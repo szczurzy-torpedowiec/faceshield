@@ -10,6 +10,7 @@ import parseArgs from 'minimist';
 import store from './store';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
+import Kinect from './kinect';
 
 const argv = parseArgs(process.argv.slice(1));
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -26,6 +27,7 @@ const rendererCommunication = new RendererCommunication({
   store,
   getTrackingActive: () => trackingActive,
 });
+const kinect = new Kinect();
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
     openAtLogin: config.enabled,
@@ -37,12 +39,16 @@ rendererCommunication.on('autostart-config-changed', (config) => {
 });
 rendererCommunication.on('start-tracking', () => {
   trackingActive = true;
+  kinect.connect();
 });
 rendererCommunication.on('pause-tracking', () => {
   trackingActive = false;
+  kinect.disconnect();
 });
 
-const overlayCommunication = new OverlayCommunication();
+kinect.on('preview-update', (args) => {
+  rendererCommunication.updatePreview(win, args);
+});
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([

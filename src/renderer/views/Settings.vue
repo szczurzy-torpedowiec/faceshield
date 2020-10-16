@@ -53,22 +53,28 @@
             width="320"
           >
             <canvas
+              v-show="previewToggle && imageAvailable"
+              ref="previewCanvasElement"
               width="320"
               height="240"
             /><!-- TODO: Set height dynamically -->
             <v-btn
+              v-if="previewToggle"
               class="preview-close"
               icon
               color="primary"
+              @click="previewToggle = false"
             >
               <v-icon>mdi-close</v-icon>
             </v-btn>
             <v-skeleton-loader
+              v-if="previewToggle && !imageAvailable && trackingActive"
               type="image@2"
               height="240"
               tile
             />
             <v-sheet
+              v-if="!previewToggle || !trackingActive"
               tile
               color="grey darken-3"
               height="240"
@@ -83,6 +89,8 @@
               <v-btn
                 color="primary"
                 class="mt-2"
+                :disabled="!trackingActive"
+                @click="previewToggle = true"
               >
                 Show preview
               </v-btn>
@@ -221,11 +229,26 @@
     },
     data: () => ({
       selectedDevice: 'kinect',
+      previewImage: null,
+      imageAvailable: false,
+      previewToggle: false,
     }),
     computed: {
       autostartConfig() {
         return this.$store.state.autostartConfig;
       },
+      trackingActive() {
+        return this.$store.state.trackingActive;
+      },
+    },
+    created() {
+      window.ipcRenderer.on('update-preview', (event, args) => {
+        this.imageAvailable = true;
+        this.previewImage.src = args;
+      });
+    },
+    mounted() {
+      this.attachCanvas();
     },
     methods: {
       toggleAutostartEnabled() {
@@ -245,6 +268,22 @@
           ...this.autostartConfig,
           minimise: !this.autostartConfig.minimise,
         });
+      },
+      attachCanvas() {
+        const c = this.$refs.previewCanvasElement;
+        const ctx = c.getContext('2d');
+        const image = new Image();
+        image.onload = function () {
+          ctx.drawImage(image, 0, 0, c.width, c.height);
+        };
+        this.previewImage = image;
+      },
+    },
+    watch: {
+      trackingActive() {
+        if (!this.trackingActive) {
+          this.imageAvailable = false;
+        }
       },
     },
   };
