@@ -19,7 +19,7 @@ export default class Kinect extends EventEmitter {
     const modulePath = 'C:\\Users\\doteq\\Documents\\FaceShieldKinectModule\\FaceShieldKinectModule.exe';
     // TODO: Sprawdzanie, czy plik modułu istnieje
     const port = await getPort();
-
+    debugger;
     this.moduleProcess = spawn(modulePath, [port.toString()]);
     this.moduleProcess.stdout.on('data', () => {
       if (!executed) {
@@ -32,6 +32,7 @@ export default class Kinect extends EventEmitter {
               const data = message.utf8Data;
               if (jsonValid(data)) {
                 // skeleton
+                const skeleton = JSON.parse(data);
                 debugger;
               } else {
                 this.emit('preview-update', data);
@@ -45,6 +46,6 @@ export default class Kinect extends EventEmitter {
   }
 
   disconnect() {
-    this.moduleProcess.kill();
+    if (this.moduleProcess) this.moduleProcess.kill();
   }
 }

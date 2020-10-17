@@ -10,7 +10,8 @@ import parseArgs from 'minimist';
 import store from './store';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
-import Kinect from './kinect';
+import Kinect from './trackers/kinect';
+import Tracker from './tracker';
 
 const argv = parseArgs(process.argv.slice(1));
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -27,7 +28,7 @@ const rendererCommunication = new RendererCommunication({
   store,
   getTrackingActive: () => trackingActive,
 });
-const kinect = new Kinect();
+const tracker = new Tracker('kinect');
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
     openAtLogin: config.enabled,
@@ -39,14 +40,14 @@ rendererCommunication.on('autostart-config-changed', (config) => {
 });
 rendererCommunication.on('start-tracking', () => {
   trackingActive = true;
-  kinect.connect();
+  tracker.connect();
 });
 rendererCommunication.on('pause-tracking', () => {
   trackingActive = false;
-  kinect.disconnect();
+  tracker.disconnect();
 });
 
-kinect.on('preview-update', (args) => {
+tracker.on('preview-update', (args) => {
   rendererCommunication.updatePreview(win, args);
 });
 
