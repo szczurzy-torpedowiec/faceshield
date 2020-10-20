@@ -28,4 +28,8 @@ export default class RendererCommunication extends EventEmitter {
   updatePreview(win, string) {
     win.webContents.send('update-preview', string);
   }
+
+  updateSkeleton(win, string) {
+    win.webContents.send('update-skeleton', string);
+  }
 }

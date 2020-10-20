@@ -4,22 +4,12 @@ import { EventEmitter } from 'events';
 
 const WebSocketClient = require('websocket').client;
 
-function jsonValid(str) {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
-
 export default class Kinect extends EventEmitter {
   async connect() {
     let executed = false;
-    const modulePath = 'C:\\Users\\doteq\\Documents\\FaceShieldKinectModule\\FaceShieldKinectModule.exe';
+    const modulePath = './modules/FaceShieldKinectModule/FaceShieldKinectModule.exe';
     // TODO: Sprawdzanie, czy plik modułu istnieje
     const port = await getPort();
-    debugger;
     this.moduleProcess = spawn(modulePath, [port.toString()]);
     this.moduleProcess.stdout.on('data', () => {
       if (!executed) {
@@ -28,15 +18,13 @@ export default class Kinect extends EventEmitter {
         client.on('connect', (connection) => {
           this.emit('connected');
           connection.on('message', (message) => {
-            if (message.type === 'utf8') {
-              const data = message.utf8Data;
-              if (jsonValid(data)) {
-                // skeleton
-                const skeleton = JSON.parse(data);
-                debugger;
-              } else {
-                this.emit('preview-update', data);
-              }
+            const msg = JSON.parse(message.utf8Data);
+            if (msg.type === 'image') {
+              this.emit('preview-update', msg.data);
+            }
+            if (msg.type === 'skeleton') {
+              const skeletonJson = JSON.parse(msg.data);
+              this.emit('skeleton-update', skeletonJson);
             }
           });
         });

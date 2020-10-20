@@ -52,12 +52,22 @@
             outlined
             width="320"
           >
-            <canvas
-              v-show="previewToggle && imageAvailable"
-              ref="previewCanvasElement"
-              width="320"
-              height="240"
-            /><!-- TODO: Set height dynamically -->
+            <div style="position: static;">
+              <img
+                v-show="previewToggle && imageAvailable"
+                ref="previewImageElement"
+                width="320"
+                height="240"
+              >
+              <canvas
+                v-show="previewToggle && imageAvailable"
+                ref="previewSkeletonCanvasElement"
+                width="320"
+                height="240"
+                style="position: absolute; left: 0; top: 0; z-index: 1;"
+              />
+            </div>
+            <!-- TODO: Set height dynamically -->
             <v-btn
               v-if="previewToggle"
               class="preview-close"
@@ -229,7 +239,7 @@
     },
     data: () => ({
       selectedDevice: 'kinect',
-      previewImage: null,
+      skeletonCanvas: null,
       imageAvailable: false,
       previewToggle: false,
     }),
@@ -240,11 +250,49 @@
       trackingActive() {
         return this.$store.state.trackingActive;
       },
+      scale() {
+        return 320 / this.$refs.previewImageElement.naturalWidth;
+      },
+    },
+    watch: {
+      trackingActive() {
+        if (!this.trackingActive) {
+          this.imageAvailable = false;
+        }
+      },
     },
     created() {
       window.ipcRenderer.on('update-preview', (event, args) => {
         this.imageAvailable = true;
-        this.previewImage.src = args;
+        this.$refs.previewImageElement.src = args;
+      });
+      window.ipcRenderer.on('update-skeleton', (event, args) => {
+        if (this.skeletonCanvas) {
+          this.skeletonCanvas.clearRect(0, 0, 320, 240);
+          // eslint-disable-next-line guard-for-in,no-restricted-syntax
+          Object.keys(args).forEach((joint) => {
+            if (joint.startsWith('hand')) {
+              this.skeletonCanvas.beginPath();
+              this.skeletonCanvas.arc(
+                args[joint].x * this.scale,
+                args[joint].y * this.scale,
+                10,
+                0,
+                Math.PI * 2,
+                true,
+              );
+              this.skeletonCanvas.closePath();
+              this.skeletonCanvas.fill();
+            } else if (joint.startsWith('head')) {
+              this.skeletonCanvas.strokeRect(
+                args.headTopLeft.x * this.scale,
+                args.headTopLeft.y * this.scale,
+                args.headTopLeft.y * this.scale - args.headBottomRight.y * this.scale,
+                args.headBottomRight.y * this.scale - args.headTopLeft.y * this.scale,
+              );
+            }
+          });
+        }
       });
     },
     mounted() {
@@ -270,20 +318,8 @@
         });
       },
       attachCanvas() {
-        const c = this.$refs.previewCanvasElement;
-        const ctx = c.getContext('2d');
-        const image = new Image();
-        image.onload = function () {
-          ctx.drawImage(image, 0, 0, c.width, c.height);
-        };
-        this.previewImage = image;
-      },
-    },
-    watch: {
-      trackingActive() {
-        if (!this.trackingActive) {
-          this.imageAvailable = false;
-        }
+        const c = this.$refs.previewSkeletonCanvasElement;
+        this.skeletonCanvas = c.getContext('2d');
       },
     },
   };

@@ -15,11 +15,11 @@ namespace FaceShieldKinectModule
         [DataContract]
         class JSONSkeleton
         {
-            [DataMember(Name = "headTop")]
-            public JSONJoint headTop { get; set; }
+            [DataMember(Name = "headTopLeft")]
+            public JSONJoint headTopLeft { get; set; }
 
-            [DataMember(Name = "headBottom")]
-            public JSONJoint headBottom { get; set; }
+            [DataMember(Name = "headBottomRight")]
+            public JSONJoint headBottomRight { get; set; }
 
             [DataMember(Name = "handLeft")]
             public JSONJoint handLeft { get; set; }
@@ -47,8 +47,8 @@ namespace FaceShieldKinectModule
             {
                 handLeft = new JSONJoint(),
                 handRight = new JSONJoint(),
-                headTop = new JSONJoint(),
-                headBottom = new JSONJoint()
+                headTopLeft = new JSONJoint(),
+                headBottomRight = new JSONJoint()
             };
             var skeleton = skeletons.First();
             List<JSONJoint> Joints = new List<JSONJoint>();
@@ -74,18 +74,20 @@ namespace FaceShieldKinectModule
                         jsonSkeleton.handRight = jointToAdd;
                         break;
                     case "head":
-                        jsonSkeleton.headTop = jointToAdd;
+                        jsonSkeleton.headTopLeft = jointToAdd;
                         break;
                     case "shouldercenter":
-                        jsonSkeleton.headBottom = jointToAdd;
+                        jsonSkeleton.headBottomRight = jointToAdd;
                         break;
                 }
                 }
-            return Serialize(jsonSkeleton);
+            jsonSkeleton.headTopLeft.X = jsonSkeleton.headTopLeft.X - ((jsonSkeleton.headTopLeft.Y -jsonSkeleton.headBottomRight.Y) / 2);
+            jsonSkeleton.headBottomRight.X = jsonSkeleton.headBottomRight.X + ((jsonSkeleton.headTopLeft.Y - jsonSkeleton.headBottomRight.Y) / 2);
+            return objToJson(jsonSkeleton);
         }
 
 
-        private static string Serialize(object obj)
+        public static string objToJson(object obj)
         {
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
 

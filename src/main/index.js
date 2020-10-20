@@ -10,7 +10,6 @@ import parseArgs from 'minimist';
 import store from './store';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
-import Kinect from './trackers/kinect';
 import Tracker from './tracker';
 
 const argv = parseArgs(process.argv.slice(1));
@@ -28,6 +27,7 @@ const rendererCommunication = new RendererCommunication({
   store,
   getTrackingActive: () => trackingActive,
 });
+// TODO: Sprawdzanie nazwy trackera
 const tracker = new Tracker('kinect');
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
@@ -48,7 +48,11 @@ rendererCommunication.on('pause-tracking', () => {
 });
 
 tracker.on('preview-update', (args) => {
-  rendererCommunication.updatePreview(win, args);
+  if (win !== null) rendererCommunication.updatePreview(win, args);
+});
+
+tracker.on('skeleton-update', (args) => {
+  if (win !== null) rendererCommunication.updateSkeleton(win, args);
 });
 
 // Scheme must be registered before the app is ready

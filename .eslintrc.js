@@ -26,7 +26,8 @@ module.exports = {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'class-methods-use-this': ['off'],
     'no-param-reassign': ['off'],
-    'no-debugger': ['off'],
+    'no-debugger': ['warn'],
+    'max-len': ['warn'],
   },
   overrides: [
     {

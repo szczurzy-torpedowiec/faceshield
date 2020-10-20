@@ -11,6 +11,9 @@ export default class Tracker extends EventEmitter {
       kinect.on('preview-update', (args) => {
         this.emit('preview-update', args);
       });
+      kinect.on('skeleton-update', (args) => {
+        this.emit('skeleton-update', args);
+      });
     }
   }
 }
