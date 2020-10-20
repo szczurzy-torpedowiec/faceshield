@@ -22,5 +22,26 @@ export default class RendererCommunication extends EventEmitter {
       event.sender.send('tracking-active-changed', false);
       this.emit('pause-tracking');
     });
+
+    ipcMain.handle('get-video-input', () => this.store.get('videoInput'));
+    ipcMain.on('set-video-input', (event, videoInput) => {
+      this.store.set('videoInput', videoInput);
+      event.sender.send('video-input-changed', videoInput);
+      this.emit('video-input-changed', videoInput);
+    });
+
+    ipcMain.handle('get-use-cpu-backend', () => this.store.get('useCpuBackend'));
+    ipcMain.on('set-use-cpu-backend', (event, useCpuBackend) => {
+      this.store.set('useCpuBackend', useCpuBackend);
+      event.sender.send('use-cpu-backend-changed', useCpuBackend);
+      this.emit('use-cpu-backend-changed', useCpuBackend);
+    });
+
+    ipcMain.handle('get-webcam-frame-wait', () => this.store.get('webcamFrameWait'));
+    ipcMain.on('set-webcam-frame-wait', (event, webcamFrameWait) => {
+      this.store.set('webcamFrameWait', webcamFrameWait);
+      event.sender.send('webcam-frame-wait-changed', webcamFrameWait);
+      this.emit('webcam-frame-wait-changed', webcamFrameWait);
+    });
   }
 }

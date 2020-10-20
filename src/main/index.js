@@ -10,6 +10,7 @@ import parseArgs from 'minimist';
 import store from './store';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
+import Webcam from './webcam';
 
 const argv = parseArgs(process.argv.slice(1));
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -21,6 +22,10 @@ let overlayWin = null;
 let tray = null;
 
 let trackingActive = false;
+
+const webcam = new Webcam({
+  store,
+});
 
 const rendererCommunication = new RendererCommunication({
   store,
@@ -40,6 +45,15 @@ rendererCommunication.on('start-tracking', () => {
 });
 rendererCommunication.on('pause-tracking', () => {
   trackingActive = false;
+});
+rendererCommunication.on('video-input-changed', (videoInput) => {
+  webcam.setInputDeviceId(videoInput === null ? null : videoInput.deviceId);
+});
+rendererCommunication.on('use-cpu-backend-changed', (useCpuBackend) => {
+  webcam.setUseCpuBackend(useCpuBackend);
+});
+rendererCommunication.on('webcam-frame-wait-changed', (wait) => {
+  webcam.setFrameWait(wait);
 });
 
 const overlayCommunication = new OverlayCommunication();
@@ -120,7 +134,7 @@ function createOverlayWindow() {
       preload: path.join(__dirname, 'overlayPreload.js'),
     },
   });
-  overlayWin.loadFile(path.join(__static, 'overlay.html'));
+  overlayWin.loadFile(path.join(__static, 'overlay.html')); // TODO: Check if needed
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     overlayWin.loadURL(new URL('/overlay.html', process.env.WEBPACK_DEV_SERVER_URL).toString());
   } else {
@@ -168,6 +182,7 @@ if (instanceLock) {
     }
 
     createOverlayWindow();
+    await webcam.start();
   });
 } else {
   app.quit();

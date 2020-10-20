@@ -31,10 +31,15 @@
           Mobile
         </v-btn>
       </v-btn-toggle>
+      <v-divider />
       <div class="d-flex flex-column flex-md-row">
-        <div class="d-flex flex-column mx-4 mr-md-0 mb-4 just-grow">
+        <div class="d-flex flex-column mt-4 just-grow">
           <v-fade-transition mode="out-in">
-            <div v-if="selectedDevice === 'kinect'">
+            <div
+              v-if="selectedDevice === 'kinect'"
+              :key="'device-kinect'"
+              class="mx-3"
+            >
               <v-alert
                 type="info"
                 text
@@ -45,9 +50,70 @@
                 Make sure you have installed correct one
               </v-alert>
             </div>
+            <div
+              v-else-if="selectedDevice === 'webcam'"
+              :key="'device-webcam'"
+            >
+              <v-list subheader>
+                <video-input-select />
+                <v-list-item
+                  link
+                  :disabled="useCpuBackend === null"
+                  @click="toggleUseCpuBackend"
+                >
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      Use CPU backend
+                    </v-list-item-title>
+                    <v-list-item-subtitle>
+                      Slow, not recommended
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <v-switch
+                      :input-value="useCpuBackend"
+                      readonly
+                    />
+                  </v-list-item-action>
+                </v-list-item>
+                <v-list-item
+                  class="d-block"
+                >
+                  <div class="d-flex align-center">
+                    <v-list-item-content class="overflow-visible">
+                      <v-list-item-title>
+                        Wait between frames
+                      </v-list-item-title>
+                      <v-list-item-subtitle>
+                        Increase the wait to reduce resource use
+                      </v-list-item-subtitle>
+                    </v-list-item-content>
+                    <v-list-item-action-text>
+                      {{ webcamFrameWait === null ? '--' : webcamFrameWait }} ms
+                    </v-list-item-action-text>
+                  </div>
+                  <v-slider
+                    :value="webcamFrameWait"
+                    :disabled="webcamFrameWait === null"
+                    dense
+                    hide-details
+                    min="0"
+                    max="500"
+                    step="25"
+                    ticks
+                    thumb-label
+                    @change="setWebcamFrameWait"
+                  />
+                </v-list-item>
+              </v-list>
+            </div>
           </v-fade-transition>
         </div>
-        <div class="shrink mx-4 align-self-center mb-4">
+        <v-divider
+          vertical
+          class="hidden-sm-and-down"
+        />
+        <div class="shrink mb-4 mt-md-4 mx-3 align-self-center">
           <v-card
             outlined
             width="320"
@@ -214,10 +280,12 @@
 
 <script>
   import ControlTile from '../components/ControlTile.vue';
+  import VideoInputSelect from '../components/settings/VideoInputSelect.vue';
 
   export default {
     components: {
       ControlTile,
+      VideoInputSelect,
     },
     data: () => ({
       selectedDevice: 'kinect',
@@ -225,6 +293,12 @@
     computed: {
       autostartConfig() {
         return this.$store.state.autostartConfig;
+      },
+      useCpuBackend() {
+        return this.$store.state.useCpuBackend;
+      },
+      webcamFrameWait() {
+        return this.$store.state.webcamFrameWait;
       },
     },
     methods: {
@@ -245,6 +319,12 @@
           ...this.autostartConfig,
           minimise: !this.autostartConfig.minimise,
         });
+      },
+      toggleUseCpuBackend() {
+        this.$comm.setUseCpuBackend(!this.useCpuBackend);
+      },
+      setWebcamFrameWait(wait) {
+        this.$comm.setWebcamFrameWait(wait);
       },
     },
   };
