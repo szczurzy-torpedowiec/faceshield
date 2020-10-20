@@ -42,7 +42,11 @@ rendererCommunication.on('pause-tracking', () => {
   trackingActive = false;
 });
 
-const overlayCommunication = new OverlayCommunication();
+// const overlayCommunication = new OverlayCommunication();
+
+setInterval(() => {
+  OverlayCommunication.setTouching(overlayWin, Math.random() < 1);
+}, 2500);
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
