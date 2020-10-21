@@ -420,7 +420,7 @@
       },
     },
     created() {
-      window.ipcRenderer.on('update-preview', (event, image) => { this.image = image; });
+      window.ipcRenderer.on('update-preview', (event, image) => { this.kinectImage = image; });
       window.ipcRenderer.on('update-skeleton', (event, skeleton) => this.drawKinectSkeleton(skeleton));
       window.ipcRenderer.on('update-webcam-data', (event, data) => {
         this.webcamData = data;
