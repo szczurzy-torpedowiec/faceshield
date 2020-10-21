@@ -11,7 +11,7 @@
               Camera
             </v-list-item-title>
             <v-list-item-subtitle>
-              {{ videoInput === null ? 'Default' : videoInput.label }}
+              {{ videoInputLabel === null ? 'Default' : videoInputLabel }}
             </v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-icon class="align-self-center">
@@ -24,8 +24,8 @@
           <v-list-item
             link
             color="primary"
-            :input-value="videoInput === null"
-            @click="setVideoInput(null)"
+            :input-value="videoInputLabel === null"
+            @click="setVideoInputLabel(null)"
           >
             <v-list-item-content>
               <v-list-item-title>
@@ -41,7 +41,7 @@
           >
             <v-list-item-content>
               <v-list-item-title>
-                {{ videoInput.label }}
+                {{ videoInput }}
               </v-list-item-title>
               <v-list-item-subtitle>
                 Disconnected
@@ -55,14 +55,14 @@
         <v-divider />
         <v-list>
           <v-list-item
-            v-for="input in videoInputs"
-            :key="input.deviceId"
-            :input-value="videoInput !== null && input.deviceId === videoInput.deviceId"
-            @click="setVideoInput(input)"
+            v-for="label in videoInputs"
+            :key="label"
+            :input-value="videoInputLabel !== null && label === videoInputLabel"
+            @click="setVideoInputLabel(label)"
           >
             <v-list-item-content>
               <v-list-item-title>
-                {{ input.label }}
+                {{ label }}
               </v-list-item-title>
             </v-list-item-content>
           </v-list-item>
@@ -92,15 +92,13 @@
       videoInputLoaded() {
         return this.$store.state.videoInputLoaded;
       },
-      videoInput() {
-        return this.$store.state.videoInput;
+      videoInputLabel() {
+        return this.$store.state.videoInputLabel;
       },
       videoInputDisconnected() {
         if (this.videoInputs === null) return null;
-        if (this.videoInput === null) return false;
-        return this.videoInputs.findIndex(
-          (input) => input.deviceId === this.videoInput.deviceId,
-        ) === -1;
+        if (this.videoInputLabel === null) return false;
+        return !this.videoInputs.includes(this.videoInputLabel);
       },
     },
     async created() {
@@ -113,17 +111,12 @@
     methods: {
       async updateVideoInputs() {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        this.videoInputs = devices.filter((device) => device.kind === 'videoinput');
+        this.videoInputs = devices
+          .filter((device) => device.kind === 'videoinput')
+          .map((device) => device.label);
       },
-      setVideoInput(input) {
-        if (input === null) {
-          this.$comm.setVideoInput(null);
-          return;
-        }
-        this.$comm.setVideoInput({
-          deviceId: input.deviceId,
-          label: input.label,
-        });
+      setVideoInputLabel(label) {
+        this.$comm.setVideoInputLabel(label);
       },
     },
   };

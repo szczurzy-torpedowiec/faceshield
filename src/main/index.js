@@ -10,8 +10,7 @@ import parseArgs from 'minimist';
 import store from './store';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
-import Webcam from './webcam';
-import Tracker from './tracker';
+import TrackerManager from './tracker-manager';
 
 const argv = parseArgs(process.argv.slice(1));
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -22,18 +21,14 @@ let win = null;
 let overlayWin = null;
 let tray = null;
 
-let trackingActive = false;
-
-const webcam = new Webcam({
+const trackerManager = new TrackerManager({
   store,
 });
-
 const rendererCommunication = new RendererCommunication({
   store,
-  getTrackingActive: () => trackingActive,
+  getTrackingActive: () => trackerManager.active,
 });
-// TODO: Sprawdzanie nazwy trackera
-const tracker = new Tracker('kinect');
+
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
     openAtLogin: config.enabled,
@@ -43,33 +38,40 @@ rendererCommunication.on('autostart-config-changed', (config) => {
     ],
   });
 });
-rendererCommunication.on('start-tracking', () => {
-  trackingActive = true;
-  tracker.connect();
+rendererCommunication.on('start-tracking', async () => {
+  await trackerManager.start();
 });
-rendererCommunication.on('pause-tracking', () => {
-  trackingActive = false;
-  tracker.disconnect();
+rendererCommunication.on('pause-tracking', async () => {
+  trackerManager.stop();
 });
-rendererCommunication.on('video-input-changed', (videoInput) => {
-  webcam.setInputDeviceId(videoInput === null ? null : videoInput.deviceId);
+
+rendererCommunication.on('video-input-label-changed', (label) => {
+  trackerManager.webcam.setVideoInputLabel(label);
 });
 rendererCommunication.on('use-cpu-backend-changed', (useCpuBackend) => {
-  webcam.setUseCpuBackend(useCpuBackend);
+  trackerManager.webcam.setUseCpuBackend(useCpuBackend);
 });
 rendererCommunication.on('webcam-frame-wait-changed', (wait) => {
-  webcam.setFrameWait(wait);
+  trackerManager.webcam.setFrameWait(wait);
+});
+rendererCommunication.on('tracker-changed', async (tracker) => {
+  await trackerManager.setTracker(tracker);
 });
 
 // const overlayCommunication = new OverlayCommunication();
 
-tracker.on('preview-update', (args) => {
+trackerManager.on('preview-update', (args) => {
   if (win !== null) rendererCommunication.updatePreview(win, args);
 });
-
-tracker.on('skeleton-update', (args) => {
+trackerManager.on('skeleton-update', (args) => {
   if (win !== null) rendererCommunication.updateSkeleton(win, args);
 });
+trackerManager.on('webcam-data-update', (data) => {
+  if (win !== null) rendererCommunication.updateWebcamData(win, data);
+});
+
+// Used to prevent webcam device id change
+app.commandLine.appendSwitch('persist-user-preferences');
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -186,8 +188,7 @@ if (instanceLock) {
     if (process.platform === 'darwin') store.set('autostart.minimise', loginItemSettings.openAsHidden);
     if (argv.autostart) {
       if (store.get('autostart.startTracking')) {
-        trackingActive = true;
-        // TODO: Start tracking
+        await trackerManager.start();
       }
       if (!store.get('autostart.minimise')) createWindow();
     } else {
@@ -195,7 +196,6 @@ if (instanceLock) {
     }
 
     createOverlayWindow();
-    await webcam.start();
   });
 } else {
   app.quit();

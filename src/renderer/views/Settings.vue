@@ -7,28 +7,39 @@
     >
       <v-card-title>Device configuration</v-card-title>
       <v-btn-toggle
-        v-model="selectedDevice"
-        mandatory
+        v-model="tracker"
+        :mandatory="tracker !== null"
         class="align-self-center mb-4"
         dense
       >
-        <v-btn value="kinect">
+        <v-btn
+          value="kinect"
+          large
+        >
           <v-icon left>
             mdi-microsoft-xbox
           </v-icon>
           Kinect
         </v-btn>
-        <v-btn value="webcam">
+        <v-btn
+          value="webcam"
+          large
+        >
           <v-icon left>
             mdi-webcam
           </v-icon>
           Webcam
         </v-btn>
-        <v-btn value="mobile">
+        <v-btn
+          disabled
+          value="mobile"
+          large
+        >
           <v-icon left>
             mdi-cellphone
           </v-icon>
-          Mobile
+          Mobile<br>
+          (Planned)
         </v-btn>
       </v-btn-toggle>
       <v-divider />
@@ -36,7 +47,7 @@
         <div class="d-flex flex-column mt-4 just-grow">
           <v-fade-transition mode="out-in">
             <div
-              v-if="selectedDevice === 'kinect'"
+              v-if="tracker === 'kinect'"
               :key="'device-kinect'"
               class="mx-3"
             >
@@ -51,7 +62,7 @@
               </v-alert>
             </div>
             <div
-              v-else-if="selectedDevice === 'webcam'"
+              v-else-if="tracker === 'webcam'"
               :key="'device-webcam'"
             >
               <v-list subheader>
@@ -116,43 +127,47 @@
         <div class="shrink mb-4 mt-md-4 mx-3 align-self-center">
           <v-card
             outlined
-            width="320"
           >
-            <div style="position: static;">
-              <img
-                v-show="previewToggle && imageAvailable"
-                ref="previewImageElement"
+            <template v-if="previewToggle">
+              <v-skeleton-loader
+                v-if="image === null"
+                type="image@2"
                 width="320"
                 height="240"
-              >
-              <canvas
-                v-show="previewToggle && imageAvailable"
-                ref="previewSkeletonCanvasElement"
-                width="320"
-                height="240"
-                style="position: absolute; left: 0; top: 0; z-index: 1;"
+                tile
               />
-            </div>
-            <!-- TODO: Set height dynamically -->
-            <v-btn
-              v-if="previewToggle"
-              class="preview-close"
-              icon
-              color="primary"
-              @click="previewToggle = false"
-            >
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-            <v-skeleton-loader
-              v-if="previewToggle && !imageAvailable && trackingActive"
-              type="image@2"
-              height="240"
-              tile
-            />
+              <div
+                v-show="image !== null"
+                class="d-flex"
+              >
+                <img
+                  v-if="image !== null"
+                  :src="image"
+                  width="320"
+                  :height="height"
+                  alt="Camera preview"
+                >
+                <canvas
+                  ref="previewSkeleton"
+                  width="320"
+                  :height="height"
+                  class="preview-skeleton"
+                />
+              </div>
+              <v-btn
+                class="preview-close"
+                icon
+                color="primary"
+                @click="previewToggle = false"
+              >
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </template>
             <v-sheet
-              v-if="!previewToggle || !trackingActive"
+              v-else
               tile
               color="grey darken-3"
+              width="320"
               height="240"
               class="d-flex flex-column align-center justify-center"
             >
@@ -163,6 +178,7 @@
                 mdi-camera
               </v-icon>
               <v-btn
+                v-if="trackingActive"
                 color="primary"
                 class="mt-2"
                 :disabled="!trackingActive"
@@ -170,6 +186,12 @@
               >
                 Show preview
               </v-btn>
+              <div
+                v-else
+                class="mt-2 py-1 text-h6 grey--text text--lighten-1"
+              >
+                Tracking paused
+              </div>
             </v-sheet>
             <v-divider />
             <v-alert
@@ -343,9 +365,8 @@
       VideoInputSelect,
     },
     data: () => ({
-      selectedDevice: 'kinect',
-      skeletonCanvas: null,
-      imageAvailable: false,
+      kinectImage: null,
+      webcamData: null,
       previewToggle: false,
     }),
     computed: {
@@ -356,7 +377,21 @@
         return this.$store.state.trackingActive;
       },
       scale() {
-        return 320 / this.$refs.previewImageElement.naturalWidth;
+        if (this.tracker === 'webcam' && this.webcamData !== null) {
+          return 320 / this.webcamData.width;
+        } if (this.tracker === 'kinect') return 320 / this.$refs.imagePreview.naturalWidth;
+        return null;
+      },
+      height() {
+        if (this.tracker === 'webcam' && this.webcamData !== null) {
+          return Math.floor(320 * (this.webcamData.height / this.webcamData.width));
+        }
+        return 240;
+      },
+      image() {
+        if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.image;
+        if (this.tracker === 'kinect') return this.kinectImage;
+        return null;
       },
       useCpuBackend() {
         return this.$store.state.useCpuBackend;
@@ -364,50 +399,33 @@
       webcamFrameWait() {
         return this.$store.state.webcamFrameWait;
       },
+      tracker: {
+        get() {
+          return this.$store.state.tracker;
+        },
+        set(value) {
+          this.$comm.setTracker(value);
+        },
+      },
     },
     watch: {
-      trackingActive() {
-        if (!this.trackingActive) {
-          this.imageAvailable = false;
+      trackingActive(value) {
+        if (!value) {
+          this.previewToggle = false;
+          this.resetState();
         }
+      },
+      tracker() {
+        this.resetState();
       },
     },
     created() {
-      window.ipcRenderer.on('update-preview', (event, args) => {
-        this.imageAvailable = true;
-        this.$refs.previewImageElement.src = args;
+      window.ipcRenderer.on('update-preview', (event, image) => { this.image = image; });
+      window.ipcRenderer.on('update-skeleton', (event, skeleton) => this.drawKinectSkeleton(skeleton));
+      window.ipcRenderer.on('update-webcam-data', (event, data) => {
+        this.webcamData = data;
+        this.drawWebcamSkeleton();
       });
-      window.ipcRenderer.on('update-skeleton', (event, args) => {
-        if (this.skeletonCanvas) {
-          this.skeletonCanvas.clearRect(0, 0, 320, 240);
-          // eslint-disable-next-line guard-for-in,no-restricted-syntax
-          Object.keys(args).forEach((joint) => {
-            if (joint.startsWith('hand')) {
-              this.skeletonCanvas.beginPath();
-              this.skeletonCanvas.arc(
-                args[joint].x * this.scale,
-                args[joint].y * this.scale,
-                10,
-                0,
-                Math.PI * 2,
-                true,
-              );
-              this.skeletonCanvas.closePath();
-              this.skeletonCanvas.fill();
-            } else if (joint.startsWith('head')) {
-              this.skeletonCanvas.strokeRect(
-                args.headTopLeft.x * this.scale,
-                args.headTopLeft.y * this.scale,
-                args.headTopLeft.y * this.scale - args.headBottomRight.y * this.scale,
-                args.headBottomRight.y * this.scale - args.headTopLeft.y * this.scale,
-              );
-            }
-          });
-        }
-      });
-    },
-    mounted() {
-      this.attachCanvas();
     },
     methods: {
       toggleAutostartEnabled() {
@@ -428,15 +446,101 @@
           minimise: !this.autostartConfig.minimise,
         });
       },
-      attachCanvas() {
-        const c = this.$refs.previewSkeletonCanvasElement;
-        this.skeletonCanvas = c.getContext('2d');
-      },
       toggleUseCpuBackend() {
         this.$comm.setUseCpuBackend(!this.useCpuBackend);
       },
       setWebcamFrameWait(wait) {
         this.$comm.setWebcamFrameWait(wait);
+      },
+      drawKinectSkeleton(skeleton) {
+        if (!this.previewToggle || !this.$refs.previewSkeleton) return;
+
+        const ctx = this.$refs.previewSkeleton.getContext('2d');
+        ctx.clearRect(0, 0, 320, this.height);
+        const hands = [skeleton.handLeft, skeleton.handRight].filter((hand) => !!hand);
+        ctx.fillStyle = '#0c0';
+        hands.forEach((hand) => {
+          ctx.beginPath();
+          ctx.arc(
+            hand.x * this.scale,
+            hand.y * this.scale,
+            10,
+            0,
+            Math.PI * 2,
+            true,
+          );
+          ctx.closePath();
+          ctx.fill();
+        });
+        if (skeleton.headTopLeft && skeleton.headBottomRight) {
+          ctx.strokeStyle = '#049';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(
+            skeleton.headTopLeft.x * this.scale,
+            skeleton.headTopLeft.y * this.scale,
+            (skeleton.headTopLeft.y - skeleton.headBottomRight.y) * this.scale,
+            (skeleton.headBottomRight.y - skeleton.headTopLeft.y) * this.scale,
+          );
+        }
+      },
+      drawWebcamSkeleton() {
+        if (!this.$refs.previewSkeleton) return;
+        const ctx = this.$refs.previewSkeleton.getContext('2d');
+        ctx.clearRect(0, 0, 320, this.height);
+        if (this.webcamData === null) return;
+
+        this.webcamData.hands.forEach((hand) => {
+          ctx.strokeStyle = '#0c0';
+          ctx.lineWidth = 3;
+          hand.landmarks.forEach(([x, y], index) => {
+            if (index === 0) return;
+            let lineEndIndex = index - 1;
+            if (lineEndIndex % 4 === 0) lineEndIndex = 0;
+            const [endX, endY] = hand.landmarks[lineEndIndex];
+            ctx.beginPath();
+            ctx.moveTo(x * this.scale, y * this.scale);
+            ctx.lineTo(endX * this.scale, endY * this.scale);
+            ctx.stroke();
+          });
+
+          ctx.fillStyle = '#0c0';
+          hand.landmarks.forEach(([x, y]) => {
+            ctx.beginPath();
+            ctx.arc(
+              x * this.scale,
+              y * this.scale,
+              3,
+              0,
+              Math.PI * 2,
+              true,
+            );
+            ctx.closePath();
+            ctx.fill();
+          });
+        });
+
+        ctx.strokeStyle = '#049';
+        ctx.lineWidth = 3;
+        this.webcamData.facesBounds.forEach(({
+          left, right, top, bottom,
+        }) => {
+          ctx.strokeRect(
+            left * this.scale,
+            top * this.scale,
+            (right - left) * this.scale,
+            (bottom - top) * this.scale,
+          );
+        });
+      },
+      clearSkeleton() {
+        if (!this.$refs.previewSkeleton) return;
+        const ctx = this.$refs.previewSkeleton.getContext('2d');
+        ctx.clearRect(0, 0, 320, this.height);
+      },
+      resetState() {
+        this.kinectImage = null;
+        this.clearSkeleton();
+        this.webcamData = null;
       },
     },
   };
@@ -454,6 +558,12 @@
       position: absolute;
       top: 8px;
       right: 8px;
+    }
+
+    .preview-skeleton {
+      position: absolute;
+      left: 0;
+      top: 0;
     }
   }
 </style>

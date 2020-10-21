@@ -7,6 +7,12 @@ class Webcam extends EventEmitter {
     super();
     this.store = options.store;
     this.window = null;
+
+    ipcMain.handle('webcam:get-video-input-label', () => this.store.get('videoInputLabel'));
+    ipcMain.handle('webcam:get-use-cpu-backend', () => this.store.get('useCpuBackend'));
+    ipcMain.handle('webcam:get-frame-wait', () => this.store.get('webcamFrameWait'));
+
+    ipcMain.on('webcam:data', (event, data) => this.emit('data-update', data));
   }
 
   async start() {
@@ -23,13 +29,6 @@ class Webcam extends EventEmitter {
       createProtocol('app');
       this.window.loadURL('app://./webcam.html');
     }
-    ipcMain.handle('webcam:get-input-device-id', () => {
-      const videoInput = this.store.get('videoInput');
-      if (videoInput === null) return null;
-      return videoInput.deviceId;
-    });
-    ipcMain.handle('webcam:get-use-cpu-backend', () => this.store.get('useCpuBackend'));
-    ipcMain.handle('webcam:get-frame-wait', () => this.store.get('webcamFrameWait'));
   }
 
   stop() {
@@ -37,9 +36,9 @@ class Webcam extends EventEmitter {
     this.window = null;
   }
 
-  setInputDeviceId(deviceId) {
+  setVideoInputLabel(label) {
     if (this.window === null) return;
-    this.window.webContents.send('webcam:input-device-id-changed', deviceId);
+    this.window.webContents.send('webcam:video-input-label-changed', label);
   }
 
   setUseCpuBackend(useCpuBackend) {

@@ -24,11 +24,11 @@ export default class RendererCommunication extends EventEmitter {
       this.emit('pause-tracking');
     });
 
-    ipcMain.handle('get-video-input', () => this.store.get('videoInput'));
-    ipcMain.on('set-video-input', (event, videoInput) => {
-      this.store.set('videoInput', videoInput);
-      event.sender.send('video-input-changed', videoInput);
-      this.emit('video-input-changed', videoInput);
+    ipcMain.handle('get-video-input-label', () => this.store.get('videoInputLabel'));
+    ipcMain.on('set-video-input-label', (event, label) => {
+      this.store.set('videoInputLabel', label);
+      event.sender.send('video-input-label-changed', label);
+      this.emit('video-input-label-changed', label);
     });
 
     ipcMain.handle('get-use-cpu-backend', () => this.store.get('useCpuBackend'));
@@ -44,13 +44,24 @@ export default class RendererCommunication extends EventEmitter {
       event.sender.send('webcam-frame-wait-changed', webcamFrameWait);
       this.emit('webcam-frame-wait-changed', webcamFrameWait);
     });
+
+    ipcMain.handle('get-tracker', () => this.store.get('tracker'));
+    ipcMain.on('set-tracker', (event, tracker) => {
+      this.store.set('tracker', tracker);
+      event.sender.send('tracker-changed', tracker);
+      this.emit('tracker-changed', tracker);
+    });
   }
 
-  updatePreview(win, string) {
-    win.webContents.send('update-preview', string);
+  updatePreview(win, image) {
+    win.webContents.send('update-preview', image);
   }
 
-  updateSkeleton(win, string) {
-    win.webContents.send('update-skeleton', string);
+  updateSkeleton(win, skeleton) {
+    win.webContents.send('update-skeleton', skeleton);
+  }
+
+  updateWebcamData(win, data) {
+    win.webContents.send('update-webcam-data', data);
   }
 }

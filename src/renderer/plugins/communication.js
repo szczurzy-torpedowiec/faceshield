@@ -6,14 +6,17 @@ class CommunicationPlugin {
     const trackingActive = await window.ipcRenderer.invoke('get-tracking-active');
     this.store.commit('setTrackingActive', trackingActive);
 
-    const videoInput = await window.ipcRenderer.invoke('get-video-input');
-    this.store.commit('setVideoInput', videoInput);
+    const videoInputLabel = await window.ipcRenderer.invoke('get-video-input-label');
+    this.store.commit('setVideoInputLabel', videoInputLabel);
 
     const useCpuBackend = await window.ipcRenderer.invoke('get-use-cpu-backend');
     this.store.commit('setUseCpuBackend', useCpuBackend);
 
     const webcamFrameWait = await window.ipcRenderer.invoke('get-webcam-frame-wait');
     this.store.commit('setWebcamFrameWait', webcamFrameWait);
+
+    const tracker = await window.ipcRenderer.invoke('get-tracker');
+    this.store.commit('setTracker', tracker);
   }
 
   setAutostartConfig(config) {
@@ -28,8 +31,8 @@ class CommunicationPlugin {
     window.ipcRenderer.send('pause-tracking');
   }
 
-  setVideoInput(videoInput) {
-    window.ipcRenderer.send('set-video-input', videoInput);
+  setVideoInputLabel(label) {
+    window.ipcRenderer.send('set-video-input-label', label);
   }
 
   setUseCpuBackend(useCpuBackend) {
@@ -40,6 +43,10 @@ class CommunicationPlugin {
     window.ipcRenderer.send('set-webcam-frame-wait', webcamFrameWait);
   }
 
+  setTracker(tracker) {
+    window.ipcRenderer.send('set-tracker', tracker);
+  }
+
   async install(Vue, options) {
     this.store = options.store;
     window.ipcRenderer.on('autostart-config-changed', (event, config) => {
@@ -48,8 +55,8 @@ class CommunicationPlugin {
     window.ipcRenderer.on('tracking-active-changed', (event, active) => {
       this.store.commit('setTrackingActive', active);
     });
-    window.ipcRenderer.on('video-input-changed', (event, videoInput) => {
-      this.store.commit('setVideoInput', videoInput);
+    window.ipcRenderer.on('video-input-label-changed', (event, label) => {
+      this.store.commit('setVideoInputLabel', label);
     });
     window.ipcRenderer.on('use-cpu-backend-changed', (event, useCpuBackend) => {
       this.store.commit('setUseCpuBackend', useCpuBackend);
@@ -57,15 +64,19 @@ class CommunicationPlugin {
     window.ipcRenderer.on('webcam-frame-wait-changed', (event, webcamFrameWait) => {
       this.store.commit('setWebcamFrameWait', webcamFrameWait);
     });
+    window.ipcRenderer.on('tracker-changed', (event, tracker) => {
+      this.store.commit('setTracker', tracker);
+    });
 
     await this.init();
     Vue.prototype.$comm = {
       setAutostartConfig: this.setAutostartConfig,
       startTracking: this.startTracking,
       pauseTracking: this.pauseTracking,
-      setVideoInput: this.setVideoInput,
+      setVideoInputLabel: this.setVideoInputLabel,
       setUseCpuBackend: this.setUseCpuBackend,
       setWebcamFrameWait: this.setWebcamFrameWait,
+      setTracker: this.setTracker,
     };
   }
 }

@@ -131,7 +131,7 @@ async function loadModels() {
 let getUserMediaPromise = null;
 let setDeviceTimeoutId = null;
 
-async function setDevice(deviceId) {
+async function setDevice(label) {
   ipcRenderer.send('webcam:data', null);
   if (setDeviceTimeoutId !== null) clearTimeout(setDeviceTimeoutId);
   if (getUserMediaPromise !== null) await waitForPromiseFinish(getUserMediaPromise);
@@ -143,12 +143,27 @@ async function setDevice(deviceId) {
     stream = null;
   }
   video.srcObject = null;
-  getUserMediaPromise = navigator.mediaDevices.getUserMedia({
-    video: {
-      deviceId: deviceId === null ? null : { exact: deviceId },
-      facingMode: 'user',
-    },
-  });
+  if (label === null) {
+    getUserMediaPromise = navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'user',
+      },
+    });
+  } else {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const device = devices.find((e) => e.kind === 'videoinput' && e.label === label);
+    if (device === null) {
+      getUserMediaPromise = Promise.reject(new Error('No device matching label found'));
+    } else {
+      getUserMediaPromise = navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: { exact: device.deviceId },
+          facingMode: 'user',
+        },
+      });
+    }
+  }
+
   try {
     stream = await getUserMediaPromise;
     video.srcObject = stream;
@@ -158,7 +173,7 @@ async function setDevice(deviceId) {
     ipcRenderer.send('webcam:camera-loading-error', true);
     setDeviceTimeoutId = setTimeout(() => {
       setDeviceTimeoutId = null;
-      setDevice(deviceId);
+      setDevice(label);
     }, 5000);
   } finally {
     getUserMediaPromise = null;
@@ -168,8 +183,8 @@ async function setDevice(deviceId) {
 async function main() {
   assignElements();
 
-  ipcRenderer.on('webcam:input-device-id-changed', async (event, deviceId) => {
-    await setDevice(deviceId);
+  ipcRenderer.on('webcam:video-input-label-changed', async (event, label) => {
+    await setDevice(label);
   });
   ipcRenderer.on('webcam:use-cpu-backend-changed', async (event, useCpuBackend) => {
     await tf.setBackend(useCpuBackend ? 'cpu' : 'webgl');
@@ -186,8 +201,8 @@ async function main() {
   await loadModels();
   console.log('Settings device...');
 
-  const deviceId = await ipcRenderer.invoke('webcam:get-input-device-id');
-  await setDevice(deviceId);
+  const label = await ipcRenderer.invoke('webcam:get-video-input-label');
+  await setDevice(label);
   console.log('Set device');
 
   frameWait = await ipcRenderer.invoke('webcam:get-frame-wait');

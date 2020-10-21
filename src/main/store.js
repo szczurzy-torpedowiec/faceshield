@@ -14,30 +14,26 @@ const schema = {
         type: 'boolean',
       },
     },
-    videoInput: {
-      anyOf: [
-        {
-          type: 'null',
-        },
-        {
-          type: 'object',
-          properties: {
-            deviceId: {
-              type: 'string',
-            },
-            label: {
-              type: 'string',
-            },
-          },
-        },
-      ],
-    },
-    useCpuBackend: {
-      type: 'boolean',
-    },
-    webcamFrameWait: {
-      type: 'number',
-    },
+  },
+  videoInputLabel: {
+    anyOf: [
+      {
+        type: 'null',
+      },
+      {
+        type: 'string',
+      },
+    ],
+  },
+  tracker: {
+    type: 'string',
+    enum: ['kinect', 'webcam'],
+  },
+  useCpuBackend: {
+    type: 'boolean',
+  },
+  webcamFrameWait: {
+    type: 'number',
   },
 };
 
@@ -47,7 +43,8 @@ const defaults = {
     startTracking: true,
     minimise: false,
   },
-  videoInput: null,
+  videoInputLabel: null,
+  tracker: 'webcam',
   useCpuBackend: false,
   webcamFrameWait: 0,
 };
