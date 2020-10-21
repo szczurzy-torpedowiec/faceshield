@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.Kinect;
 using System.Windows.Forms;
 using FaceShieldKinectModule.Properties;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 
 namespace FaceShieldKinectModule
 {
@@ -18,6 +20,16 @@ namespace FaceShieldKinectModule
         static KinectSensor sensor;
         static int port;
 
+        [DataContract]
+        class SocketMessage
+        {
+            [DataMember(Name = "type")]
+            public string type { get; set; }
+
+            [DataMember(Name = "data")]
+            public string data { get; set; }
+        }
+
         static int Main(string[] args)
         {
             if (args.Length == 0)
@@ -28,7 +40,6 @@ namespace FaceShieldKinectModule
             port = Convert.ToInt32(args[0]);
             InitializeConnection();
             InitilizeKinect();
-            initTaskbarIcon();
             Application.Run();
             return 0;
         }
@@ -82,12 +93,13 @@ namespace FaceShieldKinectModule
             {
                 if (frame != null)
                 {
-                        var image = frame.Serialize();
+                    var image = frame.Serialize();
+                    var message = jsonSocketMessage("image", image);
 
-                        foreach (var socket in _clients)
-                        {
-                            socket.Send(image);
-                        }
+                    foreach (var socket in _clients)
+                    {
+                        socket.Send(message);
+                    }
                 }
             }
 
@@ -102,33 +114,25 @@ namespace FaceShieldKinectModule
                     if (users.Count > 0)
                     {
                         string json = users.Serialize(_coordinateMapper);
+                        var message = jsonSocketMessage("skeleton", json);
 
                         foreach (var socket in _clients)
                         {
-                            socket.Send(json);
+                            socket.Send(message);
                         }
                     }
                 }
             }
         }
 
-        static NotifyIcon ni;
-        static public void initTaskbarIcon()
+        static string jsonSocketMessage(string type, string data)
         {
-            ni = new NotifyIcon()
+            SocketMessage socketMessage = new SocketMessage
             {
-                Icon = Resources.AppIcon,
-                ContextMenu = new ContextMenu(new MenuItem[] {
-                new MenuItem("Exit", Exit)
-            }),
-                Visible = true
+                type = type,
+                data = data
             };
-        }
-        static void Exit(object sender, EventArgs e)
-        {
-            ni.Visible = false;
-
-            Application.Exit();
+            return SkeletonSerializer.objToJson(socketMessage);
         }
     }
 }

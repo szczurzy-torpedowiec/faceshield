@@ -52,23 +52,39 @@
             outlined
             width="320"
           >
-            <canvas
-              width="320"
-              height="240"
-            /><!-- TODO: Set height dynamically -->
+            <div style="position: static;">
+              <img
+                v-show="previewToggle && imageAvailable"
+                ref="previewImageElement"
+                width="320"
+                height="240"
+              >
+              <canvas
+                v-show="previewToggle && imageAvailable"
+                ref="previewSkeletonCanvasElement"
+                width="320"
+                height="240"
+                style="position: absolute; left: 0; top: 0; z-index: 1;"
+              />
+            </div>
+            <!-- TODO: Set height dynamically -->
             <v-btn
+              v-if="previewToggle"
               class="preview-close"
               icon
               color="primary"
+              @click="previewToggle = false"
             >
               <v-icon>mdi-close</v-icon>
             </v-btn>
             <v-skeleton-loader
+              v-if="previewToggle && !imageAvailable && trackingActive"
               type="image@2"
               height="240"
               tile
             />
             <v-sheet
+              v-if="!previewToggle || !trackingActive"
               tile
               color="grey darken-3"
               height="240"
@@ -83,6 +99,8 @@
               <v-btn
                 color="primary"
                 class="mt-2"
+                :disabled="!trackingActive"
+                @click="previewToggle = true"
               >
                 Show preview
               </v-btn>
@@ -258,11 +276,64 @@
     },
     data: () => ({
       selectedDevice: 'kinect',
+      skeletonCanvas: null,
+      imageAvailable: false,
+      previewToggle: false,
     }),
     computed: {
       autostartConfig() {
         return this.$store.state.autostartConfig;
       },
+      trackingActive() {
+        return this.$store.state.trackingActive;
+      },
+      scale() {
+        return 320 / this.$refs.previewImageElement.naturalWidth;
+      },
+    },
+    watch: {
+      trackingActive() {
+        if (!this.trackingActive) {
+          this.imageAvailable = false;
+        }
+      },
+    },
+    created() {
+      window.ipcRenderer.on('update-preview', (event, args) => {
+        this.imageAvailable = true;
+        this.$refs.previewImageElement.src = args;
+      });
+      window.ipcRenderer.on('update-skeleton', (event, args) => {
+        if (this.skeletonCanvas) {
+          this.skeletonCanvas.clearRect(0, 0, 320, 240);
+          // eslint-disable-next-line guard-for-in,no-restricted-syntax
+          Object.keys(args).forEach((joint) => {
+            if (joint.startsWith('hand')) {
+              this.skeletonCanvas.beginPath();
+              this.skeletonCanvas.arc(
+                args[joint].x * this.scale,
+                args[joint].y * this.scale,
+                10,
+                0,
+                Math.PI * 2,
+                true,
+              );
+              this.skeletonCanvas.closePath();
+              this.skeletonCanvas.fill();
+            } else if (joint.startsWith('head')) {
+              this.skeletonCanvas.strokeRect(
+                args.headTopLeft.x * this.scale,
+                args.headTopLeft.y * this.scale,
+                args.headTopLeft.y * this.scale - args.headBottomRight.y * this.scale,
+                args.headBottomRight.y * this.scale - args.headTopLeft.y * this.scale,
+              );
+            }
+          });
+        }
+      });
+    },
+    mounted() {
+      this.attachCanvas();
     },
     methods: {
       toggleAutostartEnabled() {
@@ -282,6 +353,10 @@
           ...this.autostartConfig,
           minimise: !this.autostartConfig.minimise,
         });
+      },
+      attachCanvas() {
+        const c = this.$refs.previewSkeletonCanvasElement;
+        this.skeletonCanvas = c.getContext('2d');
       },
     },
   };

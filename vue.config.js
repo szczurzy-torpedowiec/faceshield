@@ -32,6 +32,12 @@ module.exports = {
           // eslint-disable-next-line no-template-curly-in-string
           artifactName: '${productName} v${version} setup.${ext}',
         },
+        extraFiles: [
+          {
+            from: 'modules/FaceShieldKinectModule/FaceShieldKinectModule/bin/Release',
+            to: 'modules/FaceShieldKinectModule',
+          },
+        ],
       },
     },
   },
