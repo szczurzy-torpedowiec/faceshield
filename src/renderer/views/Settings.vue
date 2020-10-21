@@ -204,67 +204,47 @@
                 Tracking paused
               </div>
             </v-sheet>
-            <v-divider />
-            <v-alert
-              text
-              tile
+            <preview-alert
               icon="mdi-alert-circle"
               color="red"
-              class="my-0"
             >
               Cannot load ML models<br>
               Check your internet connection
-            </v-alert>
-            <v-divider />
-            <v-alert
-              text
-              tile
+            </preview-alert>
+            <preview-alert
               icon="mdi-alert-circle"
               color="red"
-              class="my-0"
             >
               Cannot load video stream
-            </v-alert>
-            <v-divider />
-            <v-alert
-              text
-              tile
+            </preview-alert>
+            <preview-alert
+              :value="previewToggle && faceNotDetected"
               color="amber darken-2"
               icon="mdi-face"
-              class="my-0"
             >
               Face not detected
-            </v-alert>
-            <v-divider />
-            <v-alert
-              text
-              tile
+            </preview-alert>
+            <preview-alert
+              :value="previewToggle && handsNotDetected"
               color="amber darken-2"
               icon="mdi-hand-left"
-              class="my-0"
             >
               Hands not detected
-            </v-alert>
-            <v-divider />
-            <v-alert
-              text
-              tile
-              icon="mdi-emoticon"
+            </preview-alert>
+            <preview-alert
+              :value="previewToggle"
               color="blue"
-              class="my-0"
+              icon="mdi-emoticon"
             >
               Hands aren't touching face
-            </v-alert>
-            <v-divider />
-            <v-alert
-              text
-              tile
-              icon="mdi-emoticon-sad"
+            </preview-alert>
+            <preview-alert
+              :value="previewToggle"
               color="deep-orange"
-              class="my-0"
+              icon="mdi-emoticon-sad"
             >
               Hands are touching face
-            </v-alert>
+            </preview-alert>
           </v-card>
         </div>
       </div>
@@ -368,11 +348,13 @@
 </template>
 
 <script>
+  import PreviewAlert from '../components/settings/PreviewAlert.vue';
   import ControlTile from '../components/ControlTile.vue';
   import VideoInputSelect from '../components/settings/VideoInputSelect.vue';
 
   export default {
     components: {
+      PreviewAlert,
       ControlTile,
       VideoInputSelect,
     },
@@ -380,6 +362,7 @@
       kinectImage: null,
       webcamData: null,
       previewToggle: false,
+      skeleton: null,
     }),
     computed: {
       autostartConfig() {
@@ -419,6 +402,20 @@
           this.$comm.setTracker(value);
         },
       },
+      handsNotDetected() {
+        if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.hands.length === 0;
+        if (this.tracker === 'kinect' && this.skeleton !== null) {
+          return !this.skeleton.handLeft && !this.skeleton.handRight;
+        }
+        return null;
+      },
+      faceNotDetected() {
+        if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.facesBounds.length === 0;
+        if (this.tracker === 'kinect' && this.skeleton !== null) {
+          return !this.skeleton.headTopLeft || !this.skeleton.headBottomRight;
+        }
+        return null;
+      },
     },
     watch: {
       trackingActive(value) {
@@ -433,7 +430,10 @@
     },
     created() {
       window.ipcRenderer.on('update-preview', (event, image) => { this.kinectImage = image; });
-      window.ipcRenderer.on('update-skeleton', (event, skeleton) => this.drawKinectSkeleton(skeleton));
+      window.ipcRenderer.on('update-skeleton', (event, skeleton) => {
+        this.skeleton = skeleton;
+        this.drawKinectSkeleton();
+      });
       window.ipcRenderer.on('update-webcam-data', (event, data) => {
         this.webcamData = data;
         this.drawWebcamSkeleton();
@@ -464,12 +464,15 @@
       setWebcamFrameWait(wait) {
         this.$comm.setWebcamFrameWait(wait);
       },
-      drawKinectSkeleton(skeleton) {
+      drawKinectSkeleton() {
         if (!this.previewToggle || !this.$refs.previewSkeleton) return;
 
         const ctx = this.$refs.previewSkeleton.getContext('2d');
         ctx.clearRect(0, 0, 320, this.height);
-        const hands = [skeleton.handLeft, skeleton.handRight].filter((hand) => !!hand);
+        const hands = [
+          this.skeleton.handLeft,
+          this.skeleton.handRight,
+        ].filter((hand) => !!hand);
         ctx.fillStyle = '#0c0';
         hands.forEach((hand) => {
           ctx.beginPath();
@@ -484,14 +487,14 @@
           ctx.closePath();
           ctx.fill();
         });
-        if (skeleton.headTopLeft && skeleton.headBottomRight) {
+        if (this.skeleton.headTopLeft && this.skeleton.headBottomRight) {
           ctx.strokeStyle = '#049';
           ctx.lineWidth = 3;
           ctx.strokeRect(
-            skeleton.headTopLeft.x * this.scale,
-            skeleton.headTopLeft.y * this.scale,
-            (skeleton.headTopLeft.y - skeleton.headBottomRight.y) * this.scale,
-            (skeleton.headBottomRight.y - skeleton.headTopLeft.y) * this.scale,
+            this.skeleton.headTopLeft.x * this.scale,
+            this.skeleton.headTopLeft.y * this.scale,
+            (this.skeleton.headTopLeft.y - this.skeleton.headBottomRight.y) * this.scale,
+            (this.skeleton.headBottomRight.y - this.skeleton.headTopLeft.y) * this.scale,
           );
         }
       },
@@ -552,6 +555,7 @@
       resetState() {
         this.kinectImage = null;
         this.clearSkeleton();
+        this.skeleton = null;
         this.webcamData = null;
       },
     },
