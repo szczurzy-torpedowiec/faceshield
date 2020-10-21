@@ -31,7 +31,6 @@
     components: { KeyboardKey },
     data: () => ({
       touching: false,
-      system: process.platform,
     }),
     created() {
       window.ipcRenderer.on('overlay:set-touching', (event, touching) => {
