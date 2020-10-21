@@ -208,18 +208,29 @@
             <v-alert
               text
               tile
-              color="grey darken-3"
-              type="info"
+              icon="mdi-alert-circle"
+              color="red"
               class="my-0"
             >
-              Preview is turned off
+              Cannot load ML models<br>
+              Check your internet connection
             </v-alert>
             <v-divider />
             <v-alert
               text
               tile
-              color="deep-orange"
-              icon="mdi-emoticon-sad"
+              icon="mdi-alert-circle"
+              color="red"
+              class="my-0"
+            >
+              Cannot load video stream
+            </v-alert>
+            <v-divider />
+            <v-alert
+              text
+              tile
+              color="amber darken-2"
+              icon="mdi-face"
               class="my-0"
             >
               Face not detected
@@ -228,7 +239,7 @@
             <v-alert
               text
               tile
-              color="deep-orange"
+              color="amber darken-2"
               icon="mdi-hand-left"
               class="my-0"
             >
@@ -238,8 +249,8 @@
             <v-alert
               text
               tile
+              icon="mdi-emoticon"
               color="blue"
-              type="info"
               class="my-0"
             >
               Hands aren't touching face
@@ -248,18 +259,8 @@
             <v-alert
               text
               tile
-              color="amber darken-2"
-              type="info"
-              class="my-0"
-            >
-              Hands are close to face
-            </v-alert>
-            <v-divider />
-            <v-alert
-              text
-              tile
-              color="amber darken-4"
-              type="info"
+              icon="mdi-emoticon-sad"
+              color="deep-orange"
               class="my-0"
             >
               Hands are touching face
