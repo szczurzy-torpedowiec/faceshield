@@ -40,10 +40,7 @@ namespace FaceShieldKinectModule
             using (var stream = new MemoryStream())
             {
                 encoder.Save(stream);
-                using (BinaryReader reader = new BinaryReader(stream))
-                {
-                    return "data:image/jpg;base64," + Convert.ToBase64String(reader.ReadBytes((int)stream.Length));
-                }
+                return "data:image/jpg;base64," + Convert.ToBase64String(stream.ToArray());
             }
         }
     }

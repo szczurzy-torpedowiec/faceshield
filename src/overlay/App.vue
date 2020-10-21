@@ -3,12 +3,20 @@
     id="app"
     :class="{
       'touching': touching,
-      'visible': visible
     }"
   >
     <div class="light">
       <div class="alert">
-        Face touching detected!
+        <div class="alert__body">
+          Face touching detected!
+        </div>
+        <div class="alert__divider" />
+        <div class="alert__remove">
+          Press <keyboard-key>ctrl</keyboard-key>
+          + <keyboard-key>alt</keyboard-key>
+          + <keyboard-key>f</keyboard-key>
+          to remove from history
+        </div>
       </div>
     </div>
     <div class="light-bottom" />
@@ -16,34 +24,31 @@
 </template>
 
 <script>
+  import KeyboardKey from './components/KeyboardKey.vue';
+
   export default {
     name: 'App',
+    components: { KeyboardKey },
     data: () => ({
       touching: false,
-      visible: false,
     }),
     created() {
-      window.ipcRenderer.on('set-not-touching', () => {
-        this.visible = false;
-      });
-
-      window.ipcRenderer.on('set-about-to-touch', () => {
-        this.visible = true;
-        this.touching = false;
-      });
-
-      window.ipcRenderer.on('set-touching', () => {
-        this.visible = true;
-        this.touching = true;
+      window.ipcRenderer.on('overlay:set-touching', (event, touching) => {
+        this.touching = touching;
       });
     },
   };
 </script>
 
 <style lang="scss">
-  body {
+  $alert-color: #FF312E77;
+
+  body, html {
     margin: 0;
     overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
   }
 
   #app {
@@ -51,23 +56,14 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    --alert-color: #FF8F0077;
 
     &.touching {
-      --alert-color: #FF312E77;
-    }
-
-    &.visible {
       .light {
         opacity: 1;
         animation: alternate ease-in-out light 750ms infinite;
       }
 
       .light-bottom {
-        opacity: 1;
-      }
-
-      &.touching .alert {
         opacity: 1;
       }
     }
@@ -77,20 +73,20 @@
     flex-grow: 1;
     opacity: 0;
     transition: opacity 500ms, box-shadow 500ms;
-    box-shadow: inset 0 0 3vw 3vw var(--alert-color);
+    box-shadow: inset 0 0 3vw 3vw $alert-color;
   }
 
   @keyframes light {
     from {
-      box-shadow: inset 0 0 3vw 3vw var(--alert-color);
+      box-shadow: inset 0 0 3vw 3vw $alert-color;
     }
     to {
-      box-shadow: inset 0 0 2vw 2vw var(--alert-color);
+      box-shadow: inset 0 0 2vw 2vw $alert-color;
     }
   }
 
   .light-bottom {
-    background-color: var(--alert-color);
+    background-color: $alert-color;
     height: 56px;
     opacity: 0;
     transition: opacity 500ms;
@@ -98,20 +94,35 @@
 
   .alert {
     margin-top: 128px;
-    padding: 32px 48px;
     border: 2px solid #FF312EBB;
     border-radius: 4px;
-    background: linear-gradient(0deg, #fff9 0%, #fffb 30%, #fffb 70%, #fff9 100%);
-    color: #FF312E;
-    font-size: 2em;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 300;
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
-    text-align: center;
     box-shadow: 0 4px 24px 16px #FF312E33;
-    opacity: 0;
-    transition: 700ms opacity;
+    text-align: center;
+
+    &__body {
+      background: linear-gradient(0deg, #fff9 0%, #fffb 30%, #fffb 70%, #fff9 100%);
+      font-family: 'Roboto', sans-serif;
+      color: #FF312E;
+      font-size: 2em;
+      font-weight: 300;
+      padding: 32px 48px;
+    }
+
+    &__divider {
+      background-color: #FF312EBB;
+      height: 2px;
+      width: 100%;
+    }
+
+    &__remove {
+      background-color: #fff9;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 1.1em;
+      padding: 8px 24px;
+    }
   }
 </style>

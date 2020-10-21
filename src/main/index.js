@@ -11,6 +11,7 @@ import store from './store';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
 import Webcam from './webcam';
+import Tracker from './tracker';
 
 const argv = parseArgs(process.argv.slice(1));
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -31,6 +32,8 @@ const rendererCommunication = new RendererCommunication({
   store,
   getTrackingActive: () => trackingActive,
 });
+// TODO: Sprawdzanie nazwy trackera
+const tracker = new Tracker('kinect');
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
     openAtLogin: config.enabled,
@@ -42,9 +45,11 @@ rendererCommunication.on('autostart-config-changed', (config) => {
 });
 rendererCommunication.on('start-tracking', () => {
   trackingActive = true;
+  tracker.connect();
 });
 rendererCommunication.on('pause-tracking', () => {
   trackingActive = false;
+  tracker.disconnect();
 });
 rendererCommunication.on('video-input-changed', (videoInput) => {
   webcam.setInputDeviceId(videoInput === null ? null : videoInput.deviceId);
@@ -56,7 +61,15 @@ rendererCommunication.on('webcam-frame-wait-changed', (wait) => {
   webcam.setFrameWait(wait);
 });
 
-const overlayCommunication = new OverlayCommunication();
+// const overlayCommunication = new OverlayCommunication();
+
+tracker.on('preview-update', (args) => {
+  if (win !== null) rendererCommunication.updatePreview(win, args);
+});
+
+tracker.on('skeleton-update', (args) => {
+  if (win !== null) rendererCommunication.updateSkeleton(win, args);
+});
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
