@@ -7,7 +7,9 @@ const WebSocketClient = require('websocket').client;
 export default class Kinect extends EventEmitter {
   async connect() {
     let executed = false;
-    const modulePath = './modules/FaceShieldKinectModule/FaceShieldKinectModule.exe';
+    const modulePath = process.env.WEBPACK_DEV_SERVER_URL
+      ? './modules/FaceShieldKinectModule/FaceShieldKinectModule/bin/Release/FaceShieldKinectModule.exe'
+      : './modules/FaceShieldKinectModule/FaceShieldKinectModule.exe';
     // TODO: Sprawdzanie, czy plik modułu istnieje
     const port = await getPort();
     this.moduleProcess = spawn(modulePath, [port.toString()]);
