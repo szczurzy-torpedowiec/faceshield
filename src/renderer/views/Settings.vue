@@ -129,13 +129,24 @@
             outlined
           >
             <template v-if="previewToggle">
-              <v-skeleton-loader
+              <v-sheet
                 v-if="image === null"
-                type="image@2"
+                tile
+                color="grey lighten-2"
                 width="320"
                 height="240"
-                tile
-              />
+                class="d-flex flex-column align-center justify-center"
+              >
+                <v-progress-circular
+                  indeterminate
+                  color="primary"
+                  :size="64"
+                />
+                <h1 class="mt-3">
+                  Loading
+                </h1>
+                <div>This might take a few minutes</div>
+              </v-sheet>
               <div
                 v-show="image !== null"
                 class="d-flex"
