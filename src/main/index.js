@@ -47,6 +47,8 @@ rendererCommunication.on('pause-tracking', () => {
   tracker.disconnect();
 });
 
+// const overlayCommunication = new OverlayCommunication();
+
 tracker.on('preview-update', (args) => {
   if (win !== null) rendererCommunication.updatePreview(win, args);
 });

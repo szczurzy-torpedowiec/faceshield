@@ -227,6 +227,43 @@
         </v-list-item>
       </v-list>
     </v-card>
+    <v-card
+      outlined
+      class="mt-4"
+    >
+      <v-card-title>
+        Alerts
+      </v-card-title>
+      <v-list>
+        <v-list-item link>
+          <v-list-item-title>
+            Show alerts overlay
+          </v-list-item-title>
+          <v-list-item-action>
+            <v-switch
+              :input-value="false"
+              readonly
+            />
+          </v-list-item-action>
+        </v-list-item>
+        <v-list-item link>
+          <v-list-item-content>
+            <v-list-item-title>
+              Enable false alert shortcut
+            </v-list-item-title>
+            <v-list-item-subtitle>
+              Press Ctrl + Alt + F to remove previous touch from history
+            </v-list-item-subtitle>
+          </v-list-item-content>
+          <v-list-item-action>
+            <v-switch
+              :input-value="false"
+              readonly
+            />
+          </v-list-item-action>
+        </v-list-item>
+      </v-list>
+    </v-card>
   </div>
 </template>
 
