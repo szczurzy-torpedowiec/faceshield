@@ -30,6 +30,7 @@ export default class TrackerManager extends EventEmitter {
   }
 
   async start() {
+    if (this.active) return;
     this.active = true;
     if (this.tracker === 'kinect') {
       await this.kinect.connect();
@@ -39,6 +40,7 @@ export default class TrackerManager extends EventEmitter {
   }
 
   stop() {
+    if (!this.active) return;
     if (this.tracker === 'kinect') {
       this.kinect.disconnect();
     } else if (this.tracker === 'webcam') {
