@@ -145,7 +145,9 @@
                 <h1 class="mt-3">
                   Loading
                 </h1>
-                <div>This might take a few minutes</div>
+                <div v-if="tracker === 'webcam'">
+                  This might take a few minutes
+                </div>
               </v-sheet>
               <div
                 v-show="image !== null"
