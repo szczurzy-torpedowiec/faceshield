@@ -153,6 +153,7 @@
               >
                 <img
                   v-if="image !== null"
+                  ref="imagePreview"
                   :src="image"
                   width="320"
                   :height="height"
