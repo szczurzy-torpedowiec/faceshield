@@ -25,7 +25,7 @@ let frameWait = 0;
 
 function waitForPromiseFinish(promise) {
   return new Promise((resolve) => {
-    promise.then(() => resolve()).finally(() => resolve());
+    promise.then(resolve, resolve);
   });
 }
 
