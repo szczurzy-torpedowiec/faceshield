@@ -205,6 +205,7 @@
               </v-btn>
             </v-sheet>
             <preview-alert
+              :value="webcamModelsError"
               icon="mdi-alert-circle"
               color="red"
             >
@@ -212,6 +213,7 @@
               Check your internet connection
             </preview-alert>
             <preview-alert
+              :value="webcamCameraError"
               icon="mdi-alert-circle"
               color="red"
             >
@@ -407,6 +409,14 @@
         set(value) {
           this.$comm.setTracker(value);
         },
+      },
+      webcamModelsError() {
+        if (this.tracker !== 'webcam') return null;
+        return this.$store.state.webcamModelsError;
+      },
+      webcamCameraError() {
+        if (this.tracker !== 'webcam') return null;
+        return this.$store.state.webcamCameraError;
       },
       handsNotDetected() {
         if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.hands.length === 0;

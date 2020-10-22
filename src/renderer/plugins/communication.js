@@ -20,6 +20,12 @@ class CommunicationPlugin {
 
     const tracker = await window.ipcRenderer.invoke('get-tracker');
     this.store.commit('setTracker', tracker);
+
+    const webcamModelsError = await window.ipcRenderer.invoke('get-webcam-models-error');
+    this.store.commit('setWebcamModelsError', webcamModelsError);
+
+    const webcamCameraError = await window.ipcRenderer.invoke('get-webcam-camera-error');
+    this.store.commit('setWebcamCameraError', webcamCameraError);
   }
 
   setAutostartConfig(config) {
@@ -80,6 +86,12 @@ class CommunicationPlugin {
     });
     window.ipcRenderer.on('tracker-changed', (event, tracker) => {
       this.store.commit('setTracker', tracker);
+    });
+    window.ipcRenderer.on('webcam-models-error-changed', (event, error) => {
+      this.store.commit('setWebcamModelsError', error);
+    });
+    window.ipcRenderer.on('webcam-camera-error-changed', (event, error) => {
+      this.store.commit('setWebcamCameraError', error);
     });
 
     await this.init();

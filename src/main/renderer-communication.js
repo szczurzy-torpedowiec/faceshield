@@ -7,6 +7,8 @@ export default class RendererCommunication extends EventEmitter {
     this.store = options.store;
     this.getTrackingActive = options.getTrackingActive;
     this.getPreviewActive = options.getPreviewActive;
+    this.getWebcamModelsError = options.getWebcamModelsError;
+    this.getWebcamCameraError = options.getWebcamCameraError;
 
     ipcMain.handle('get-autostart-config', () => this.store.get('autostart'));
     ipcMain.on('set-autostart-config', (event, config) => {
@@ -62,6 +64,9 @@ export default class RendererCommunication extends EventEmitter {
       event.sender.send('tracker-changed', tracker);
       this.emit('tracker-changed', tracker);
     });
+
+    ipcMain.handle('get-webcam-models-error', () => this.getWebcamModelsError());
+    ipcMain.handle('get-webcam-camera-error', () => this.getWebcamCameraError());
   }
 
   updatePreview(win, image) {
@@ -74,5 +79,13 @@ export default class RendererCommunication extends EventEmitter {
 
   updateWebcamData(win, data) {
     win.webContents.send('update-webcam-data', data);
+  }
+
+  setWebcamModelsError(win, error) {
+    win.webContents.send('webcam-models-error-changed', error);
+  }
+
+  setWebcamCameraError(win, error) {
+    win.webContents.send('webcam-camera-error-changed', error);
   }
 }

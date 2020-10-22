@@ -28,6 +28,8 @@ const rendererCommunication = new RendererCommunication({
   store,
   getTrackingActive: () => trackerManager.trackingActive,
   getPreviewActive: () => trackerManager.previewActive,
+  getWebcamModelsError: () => trackerManager.webcam.modelsError,
+  getWebcamCameraError: () => trackerManager.webcam.cameraError,
 });
 
 rendererCommunication.on('autostart-config-changed', (config) => {
@@ -74,6 +76,12 @@ trackerManager.on('skeleton-update', (args) => {
 });
 trackerManager.on('webcam-data-update', (data) => {
   if (win !== null) rendererCommunication.updateWebcamData(win, data);
+});
+trackerManager.webcam.on('models-error', (error) => {
+  if (win !== null) rendererCommunication.setWebcamModelsError(win, error);
+});
+trackerManager.webcam.on('camera-error', (error) => {
+  if (win !== null) rendererCommunication.setWebcamCameraError(win, error);
 });
 
 // Used to prevent webcam device id change

@@ -13,6 +13,8 @@ export default new Vuex.Store({
     useCpuBackend: null,
     webcamFrameWait: null,
     tracker: null,
+    webcamModelsError: null,
+    webcamCameraError: null,
   },
   mutations: {
     setAutostartConfig(state, config) {
@@ -36,6 +38,12 @@ export default new Vuex.Store({
     },
     setTracker(state, tracker) {
       state.tracker = tracker;
+    },
+    setWebcamModelsError(state, error) {
+      state.webcamModelsError = error;
+    },
+    setWebcamCameraError(state, error) {
+      state.webcamCameraError = error;
     },
   },
   actions: {

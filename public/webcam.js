@@ -3,6 +3,8 @@ console.log('Importing dependencies...');
 const { ipcRenderer } = require('electron');
 
 ipcRenderer.send('webcam:data', null);
+ipcRenderer.send('webcam:models-error', false);
+ipcRenderer.send('webcam:camera-error', false);
 
 const faceLandmarksDetection = require('@tensorflow-models/face-landmarks-detection');
 const handtrack = require('@tensorflow-models/handpose');
@@ -114,8 +116,8 @@ async function loadModels() {
   try {
     faceModel = await faceLandmarksDetection.load();
     handsModel = await handtrack.load();
-    ipcRenderer.send('webcam:models-loading-error', true);
   } catch (error) {
+    ipcRenderer.send('webcam:models-error', true);
     console.error(error);
     await new Promise((resolve) => {
       setTimeout(async () => {
@@ -125,7 +127,7 @@ async function loadModels() {
     });
   }
 
-  ipcRenderer.send('webcam:models-loading-error', false);
+  ipcRenderer.send('webcam:models-error', false);
 }
 
 let getUserMediaPromise = null;
@@ -167,10 +169,10 @@ async function setDevice(label) {
   try {
     stream = await getUserMediaPromise;
     video.srcObject = stream;
-    ipcRenderer.send('webcam:camera-loading-error', false);
+    ipcRenderer.send('webcam:camera-error', false);
   } catch (error) {
     console.error(error);
-    ipcRenderer.send('webcam:camera-loading-error', true);
+    ipcRenderer.send('webcam:camera-error', true);
     setDeviceTimeoutId = setTimeout(() => {
       setDeviceTimeoutId = null;
       setDevice(label);
