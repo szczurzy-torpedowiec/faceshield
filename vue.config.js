@@ -23,6 +23,14 @@ module.exports = {
         rendererPreload: 'src/renderer/preload.js',
         overlayPreload: 'src/overlay/preload.js',
       },
+      externals: [
+        '@tensorflow-models/face-landmarks-detection',
+        '@tensorflow-models/handpose',
+        '@tensorflow/tfjs-converter',
+        '@tensorflow/tfjs-core',
+        '@tensorflow/tfjs-backend-webgl',
+        '@tensorflow/tfjs-backend-cpu',
+      ],
       builderOptions: {
         appId: 'io.github.doteq.faceshield',
         productName: 'Face Shield',

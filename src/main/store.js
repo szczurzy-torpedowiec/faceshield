@@ -15,6 +15,26 @@ const schema = {
       },
     },
   },
+  videoInputLabel: {
+    anyOf: [
+      {
+        type: 'null',
+      },
+      {
+        type: 'string',
+      },
+    ],
+  },
+  tracker: {
+    type: 'string',
+    enum: ['kinect', 'webcam'],
+  },
+  useCpuBackend: {
+    type: 'boolean',
+  },
+  webcamFrameWait: {
+    type: 'number',
+  },
 };
 
 const defaults = {
@@ -23,6 +43,10 @@ const defaults = {
     startTracking: true,
     minimise: false,
   },
+  videoInputLabel: null,
+  tracker: 'webcam',
+  useCpuBackend: false,
+  webcamFrameWait: 0,
 };
 
 const store = new Store({

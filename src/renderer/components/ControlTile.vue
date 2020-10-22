@@ -31,55 +31,60 @@
     </v-sheet>
     <v-expand-transition>
       <div v-if="active === true">
-        <div
-          v-if="state === 'no-camera'"
-          class="px-4 py-3 d-flex align-center"
+        <v-alert
+          v-if="state === 'tracker-loading'"
+          tile
+          class="mb-0"
         >
-          <v-icon
-            left
-            color="red"
-          >
-            mdi-camera-off
-          </v-icon>
-          Camera not connected
-          <v-spacer />
-        </div>
-        <div
+          <template #prepend>
+            <v-progress-circular
+              indeterminate
+              class="mr-4"
+              color="primary"
+              :size="24"
+              :width="2"
+            />
+          </template>
+          Tracker loading
+        </v-alert>
+        <v-alert
+          v-else-if="state === 'tracker-error'"
+          icon="mdi-alert-circle"
+          color="red"
+          tile
+          text
+          class="mb-0"
+        >
+          Tracking error
+        </v-alert>
+        <v-alert
           v-else-if="state === 'face-not-detected'"
-          class="px-4 py-3 d-flex align-center"
+          icon="mdi-face"
+          color="amber darken-2"
+          tile
+          text
+          class="mb-0"
         >
-          <v-icon
-            left
-            color="amber darken-1"
-          >
-            mdi-account-off
-          </v-icon>
           Face not detected
-        </div>
-        <div
+        </v-alert>
+        <v-alert
           v-else-if="state === 'not-touching'"
-          class="px-4 py-3 d-flex align-center"
+          icon="mdi-emoticon"
+          tile
+          class="mb-0"
         >
-          <v-icon
-            left
-            color="green"
-          >
-            mdi-emoticon
-          </v-icon>
-          Not touching
-        </div>
-        <div
-          v-else
-          class="px-4 py-3 d-flex align-center red--text"
+          Not touching face
+        </v-alert>
+        <v-alert
+          v-else-if="state === 'touching'"
+          icon="mdi-emoticon-sad"
+          tile
+          color="deep-orange"
+          text
+          class="mb-0"
         >
-          <v-icon
-            left
-            color="red"
-          >
-            mdi-alert-box
-          </v-icon>
-          Touching detected
-        </div>
+          Touching face!
+        </v-alert>
       </div>
     </v-expand-transition>
   </v-card>
@@ -100,7 +105,7 @@
     },
     methods: {
       randomiseState() {
-        this.state = ['no-camera', 'face-not-detected', 'not-touching', 'touching'][Math.floor(Math.random() * 4)];
+        this.state = ['tracker-loading', 'tracker-error', 'face-not-detected', 'not-touching', 'touching'][Math.floor(Math.random() * 5)];
       },
       startTracking() {
         this.$comm.startTracking();

@@ -27,6 +27,7 @@ module.exports = {
     'class-methods-use-this': ['off'],
     'no-param-reassign': ['off'],
     'no-debugger': ['warn'],
+    'no-console': ['off'],
     'max-len': ['warn'],
   },
   overrides: [
@@ -34,12 +35,6 @@ module.exports = {
       files: ['*.vue'],
       rules: {
         indent: 'off',
-      },
-    },
-    {
-      files: ['src/main/*'],
-      rules: {
-        'no-console': 'off',
       },
     },
   ],
