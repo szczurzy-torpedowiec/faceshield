@@ -5,7 +5,8 @@ import Webcam from './trackers/webcam';
 export default class TrackerManager extends EventEmitter {
   constructor(options) {
     super();
-    this.active = false;
+    this.trackingActive = false;
+    this.previewActive = false;
     this.store = options.store;
     this.tracker = this.store.get('tracker');
     this.initKinect();
@@ -30,8 +31,6 @@ export default class TrackerManager extends EventEmitter {
   }
 
   async start() {
-    if (this.active) return;
-    this.active = true;
     if (this.tracker === 'kinect') {
       await this.kinect.connect();
     } else if (this.tracker === 'webcam') {
@@ -40,17 +39,43 @@ export default class TrackerManager extends EventEmitter {
   }
 
   stop() {
-    if (!this.active) return;
     if (this.tracker === 'kinect') {
       this.kinect.disconnect();
     } else if (this.tracker === 'webcam') {
       this.webcam.stop();
     }
-    this.active = false;
+  }
+
+  async startTracking() {
+    if (this.trackingActive) return;
+    this.trackingActive = true;
+    if (this.previewActive) return;
+    await this.start();
+  }
+
+  stopTracking() {
+    if (!this.trackingActive) return;
+    this.trackingActive = false;
+    if (this.previewActive) return;
+    this.stop();
+  }
+
+  async startPreview() {
+    if (this.previewActive) return;
+    this.previewActive = true;
+    if (this.trackingActive) return;
+    await this.start();
+  }
+
+  stopPreview() {
+    if (!this.previewActive) return;
+    this.previewActive = false;
+    if (this.trackingActive) return;
+    this.stop();
   }
 
   async setTracker(tracker) {
-    if (!this.active) {
+    if (!(this.trackingActive || this.previewActive)) {
       this.tracker = tracker;
       return;
     }

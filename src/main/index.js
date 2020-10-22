@@ -26,7 +26,8 @@ const trackerManager = new TrackerManager({
 });
 const rendererCommunication = new RendererCommunication({
   store,
-  getTrackingActive: () => trackerManager.active,
+  getTrackingActive: () => trackerManager.trackingActive,
+  getPreviewActive: () => trackerManager.previewActive,
 });
 
 rendererCommunication.on('autostart-config-changed', (config) => {
@@ -39,12 +40,17 @@ rendererCommunication.on('autostart-config-changed', (config) => {
   });
 });
 rendererCommunication.on('start-tracking', async () => {
-  await trackerManager.start();
+  await trackerManager.startTracking();
 });
 rendererCommunication.on('pause-tracking', async () => {
-  trackerManager.stop();
+  trackerManager.stopTracking();
 });
-
+rendererCommunication.on('start-preview', async () => {
+  await trackerManager.startPreview();
+});
+rendererCommunication.on('stop-preview', async () => {
+  trackerManager.stopPreview();
+});
 rendererCommunication.on('video-input-label-changed', (label) => {
   trackerManager.webcam.setVideoInputLabel(label);
 });
@@ -105,6 +111,7 @@ function createWindow() {
 
   win.on('closed', () => {
     win = null;
+    trackerManager.stopPreview();
   });
 }
 
@@ -188,7 +195,7 @@ if (instanceLock) {
     if (process.platform === 'darwin') store.set('autostart.minimise', loginItemSettings.openAsHidden);
     if (argv.autostart) {
       if (store.get('autostart.startTracking')) {
-        await trackerManager.start();
+        await trackerManager.startTracking();
       }
       if (!store.get('autostart.minimise')) createWindow();
     } else {

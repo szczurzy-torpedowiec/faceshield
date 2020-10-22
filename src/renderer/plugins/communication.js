@@ -6,6 +6,9 @@ class CommunicationPlugin {
     const trackingActive = await window.ipcRenderer.invoke('get-tracking-active');
     this.store.commit('setTrackingActive', trackingActive);
 
+    const previewActive = await window.ipcRenderer.invoke('get-preview-active');
+    this.store.commit('setPreviewActive', previewActive);
+
     const videoInputLabel = await window.ipcRenderer.invoke('get-video-input-label');
     this.store.commit('setVideoInputLabel', videoInputLabel);
 
@@ -29,6 +32,14 @@ class CommunicationPlugin {
 
   pauseTracking() {
     window.ipcRenderer.send('pause-tracking');
+  }
+
+  startPreview() {
+    window.ipcRenderer.send('start-preview');
+  }
+
+  stopPreview() {
+    window.ipcRenderer.send('stop-preview');
   }
 
   setVideoInputLabel(label) {
@@ -55,6 +66,9 @@ class CommunicationPlugin {
     window.ipcRenderer.on('tracking-active-changed', (event, active) => {
       this.store.commit('setTrackingActive', active);
     });
+    window.ipcRenderer.on('preview-active-changed', (event, active) => {
+      this.store.commit('setPreviewActive', active);
+    });
     window.ipcRenderer.on('video-input-label-changed', (event, label) => {
       this.store.commit('setVideoInputLabel', label);
     });
@@ -73,6 +87,8 @@ class CommunicationPlugin {
       setAutostartConfig: this.setAutostartConfig,
       startTracking: this.startTracking,
       pauseTracking: this.pauseTracking,
+      startPreview: this.startPreview,
+      stopPreview: this.stopPreview,
       setVideoInputLabel: this.setVideoInputLabel,
       setUseCpuBackend: this.setUseCpuBackend,
       setWebcamFrameWait: this.setWebcamFrameWait,

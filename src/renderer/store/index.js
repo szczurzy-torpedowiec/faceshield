@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     autostartConfig: null,
     trackingActive: null,
+    previewActive: null,
     videoInputLoaded: false,
     videoInputLabel: null,
     useCpuBackend: null,
@@ -17,8 +18,11 @@ export default new Vuex.Store({
     setAutostartConfig(state, config) {
       state.autostartConfig = config;
     },
-    setTrackingActive(state, trackingActive) {
-      state.trackingActive = trackingActive;
+    setTrackingActive(state, active) {
+      state.trackingActive = active;
+    },
+    setPreviewActive(state, active) {
+      state.previewActive = active;
     },
     setVideoInputLabel(state, label) {
       state.videoInputLoaded = true;

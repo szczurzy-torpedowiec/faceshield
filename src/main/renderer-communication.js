@@ -6,6 +6,7 @@ export default class RendererCommunication extends EventEmitter {
     super();
     this.store = options.store;
     this.getTrackingActive = options.getTrackingActive;
+    this.getPreviewActive = options.getPreviewActive;
 
     ipcMain.handle('get-autostart-config', () => this.store.get('autostart'));
     ipcMain.on('set-autostart-config', (event, config) => {
@@ -22,6 +23,16 @@ export default class RendererCommunication extends EventEmitter {
     ipcMain.on('pause-tracking', (event) => {
       event.sender.send('tracking-active-changed', false);
       this.emit('pause-tracking');
+    });
+
+    ipcMain.handle('get-preview-active', () => this.getPreviewActive());
+    ipcMain.on('start-preview', (event) => {
+      event.sender.send('preview-active-changed', true);
+      this.emit('start-preview');
+    });
+    ipcMain.on('stop-preview', (event) => {
+      event.sender.send('preview-active-changed', false);
+      this.emit('stop-preview');
     });
 
     ipcMain.handle('get-video-input-label', () => this.store.get('videoInputLabel'));

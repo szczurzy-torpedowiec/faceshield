@@ -128,7 +128,7 @@
           <v-card
             outlined
           >
-            <template v-if="previewToggle">
+            <template v-if="previewActive">
               <v-sheet
                 v-if="image === null"
                 tile
@@ -165,14 +165,21 @@
                   class="preview-skeleton"
                 />
               </div>
-              <v-btn
-                class="preview-close"
-                icon
-                color="primary"
-                @click="previewToggle = false"
-              >
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
+              <v-tooltip left>
+                <template #activator="{ on }">
+                  <v-btn
+                    fab
+                    class="preview-close"
+                    color="primary"
+                    small
+                    @click="stopPreview"
+                    v-on="on"
+                  >
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </template>
+                <span>Close preview</span>
+              </v-tooltip>
             </template>
             <v-sheet
               v-else
@@ -189,20 +196,12 @@
                 mdi-camera
               </v-icon>
               <v-btn
-                v-if="trackingActive"
                 color="primary"
                 class="mt-2"
-                :disabled="!trackingActive"
-                @click="previewToggle = true"
+                @click="startPreview"
               >
                 Show preview
               </v-btn>
-              <div
-                v-else
-                class="mt-2 py-1 text-h6 grey--text text--lighten-1"
-              >
-                Tracking paused
-              </div>
             </v-sheet>
             <preview-alert
               icon="mdi-alert-circle"
@@ -218,28 +217,28 @@
               Cannot load video stream
             </preview-alert>
             <preview-alert
-              :value="previewToggle && faceNotDetected"
+              :value="previewActive && faceNotDetected"
               color="amber darken-2"
               icon="mdi-face"
             >
               Face not detected
             </preview-alert>
             <preview-alert
-              :value="previewToggle && handsNotDetected"
+              :value="previewActive && handsNotDetected"
               color="amber darken-2"
               icon="mdi-hand-left"
             >
               Hands not detected
             </preview-alert>
             <preview-alert
-              :value="previewToggle"
+              :value="previewActive"
               color="blue"
               icon="mdi-emoticon"
             >
               Hands aren't touching face
             </preview-alert>
             <preview-alert
-              :value="previewToggle"
+              :value="previewActive"
               color="deep-orange"
               icon="mdi-emoticon-sad"
             >
@@ -358,10 +357,13 @@
       ControlTile,
       VideoInputSelect,
     },
+    beforeRouteLeave(to, from, next) {
+      this.$comm.stopPreview();
+      next();
+    },
     data: () => ({
       kinectImage: null,
       webcamData: null,
-      previewToggle: false,
       skeleton: null,
     }),
     computed: {
@@ -370,6 +372,9 @@
       },
       trackingActive() {
         return this.$store.state.trackingActive;
+      },
+      previewActive() {
+        return this.$store.state.previewActive;
       },
       scale() {
         if (this.tracker === 'webcam' && this.webcamData !== null) {
@@ -418,9 +423,8 @@
       },
     },
     watch: {
-      trackingActive(value) {
+      previewActive(value) {
         if (!value) {
-          this.previewToggle = false;
           this.resetState();
         }
       },
@@ -464,8 +468,14 @@
       setWebcamFrameWait(wait) {
         this.$comm.setWebcamFrameWait(wait);
       },
+      startPreview() {
+        this.$comm.startPreview();
+      },
+      stopPreview() {
+        this.$comm.stopPreview();
+      },
       drawKinectSkeleton() {
-        if (!this.previewToggle || !this.$refs.previewSkeleton) return;
+        if (!this.previewActive || !this.$refs.previewSkeleton) return;
 
         const ctx = this.$refs.previewSkeleton.getContext('2d');
         ctx.clearRect(0, 0, 320, this.height);
