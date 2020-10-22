@@ -220,6 +220,13 @@
               Cannot load video stream
             </preview-alert>
             <preview-alert
+              :value="webcamExecuteError"
+              icon="mdi-alert-circle"
+              color="red"
+            >
+              There was an error during pose prediction
+            </preview-alert>
+            <preview-alert
               :value="previewActive && faceNotDetected"
               color="amber darken-2"
               icon="mdi-face"
@@ -417,6 +424,10 @@
       webcamCameraError() {
         if (this.tracker !== 'webcam') return null;
         return this.$store.state.webcamCameraError;
+      },
+      webcamExecuteError() {
+        if (this.tracker !== 'webcam') return null;
+        return this.$store.state.webcamExecuteError;
       },
       handsNotDetected() {
         if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.hands.length === 0;

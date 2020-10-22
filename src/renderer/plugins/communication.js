@@ -26,6 +26,9 @@ class CommunicationPlugin {
 
     const webcamCameraError = await window.ipcRenderer.invoke('get-webcam-camera-error');
     this.store.commit('setWebcamCameraError', webcamCameraError);
+
+    const webcamExecuteError = await window.ipcRenderer.invoke('get-webcam-execute-error');
+    this.store.commit('setWebcamExecuteError', webcamExecuteError);
   }
 
   setAutostartConfig(config) {
@@ -92,6 +95,9 @@ class CommunicationPlugin {
     });
     window.ipcRenderer.on('webcam-camera-error-changed', (event, error) => {
       this.store.commit('setWebcamCameraError', error);
+    });
+    window.ipcRenderer.on('webcam-execute-error-changed', (event, error) => {
+      this.store.commit('setWebcamExecuteError', error);
     });
 
     await this.init();

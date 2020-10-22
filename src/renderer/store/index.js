@@ -15,6 +15,7 @@ export default new Vuex.Store({
     tracker: null,
     webcamModelsError: null,
     webcamCameraError: null,
+    webcamExecuteError: null,
   },
   mutations: {
     setAutostartConfig(state, config) {
@@ -44,6 +45,9 @@ export default new Vuex.Store({
     },
     setWebcamCameraError(state, error) {
       state.webcamCameraError = error;
+    },
+    setWebcamExecuteError(state, error) {
+      state.webcamExecuteError = error;
     },
   },
   actions: {

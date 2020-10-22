@@ -5,6 +5,7 @@ const { ipcRenderer } = require('electron');
 ipcRenderer.send('webcam:data', null);
 ipcRenderer.send('webcam:models-error', false);
 ipcRenderer.send('webcam:camera-error', false);
+ipcRenderer.send('webcam:execute-error', false);
 
 const faceLandmarksDetection = require('@tensorflow-models/face-landmarks-detection');
 const handtrack = require('@tensorflow-models/handpose');
@@ -46,70 +47,49 @@ function assignElements() {
 }
 
 async function execute() {
-  await waitForDataLoaded();
-  if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
-  if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const image = canvas.toDataURL('image/jpeg');
-  const [faces, hands] = await Promise.all([
-    faceModel.estimateFaces({ input: video }),
-    handsModel.estimateHands(video),
-  ]);
+  try {
+    await waitForDataLoaded();
+    if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
+    if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const image = canvas.toDataURL('image/jpeg');
+    const [faces, hands] = await Promise.all([
+      faceModel.estimateFaces({ input: video }),
+      handsModel.estimateHands(video),
+    ]);
 
-  const facesBounds = faces.map((face) => {
-    let left = canvas.width;
-    let right = 0;
-    let top = canvas.height;
-    let bottom = 0;
+    const facesBounds = faces.map((face) => {
+      let left = canvas.width;
+      let right = 0;
+      let top = canvas.height;
+      let bottom = 0;
 
-    face.scaledMesh.forEach(([x, y]) => {
-      if (x < left) left = x;
-      if (x > right) right = x;
-      if (y < top) top = y;
-      if (y > bottom) bottom = y;
+      face.scaledMesh.forEach(([x, y]) => {
+        if (x < left) left = x;
+        if (x > right) right = x;
+        if (y < top) top = y;
+        if (y > bottom) bottom = y;
+      });
+
+      return {
+        left, right, top, bottom,
+      };
     });
-
-    // const width = right - left;
-    // const height = bottom - top;
-    // ctx.strokeWidth = 8;
-    // ctx.strokeStyle = '#FF00FF';
-    // ctx.strokeRect(left, top, width, height);
-    // const centerX = left + width / 2;
-    // const centerY = top + height / 2;
-    //
-    // let maxRadius2 = 0;
-    //
-    // face.scaledMesh.forEach(([x, y]) => {
-    //   const radius2 = (x - centerX) ** 2 + (y - centerY) ** 2;
-    //   if (radius2 > maxRadius2) maxRadius2 = radius2;
-    // });
-    //
-    // ctx.beginPath();
-    // ctx.arc(left + width / 2, top + height / 2, Math.sqrt(maxRadius2), 0, 2 * Math.PI);
-    // ctx.stroke();
-
-    return {
-      left, right, top, bottom,
-    };
-  });
-  // hands.forEach((hand) => {
-  //   hand.landmarks.forEach(([x, y]) => {
-  //     ctx.fillStyle = '#00FF00';
-  //     ctx.beginPath();
-  //     ctx.arc(x, y, 4, 0, 2 * Math.PI);
-  //     ctx.fill();
-  //   });
-  // });
-  ipcRenderer.send('webcam:data', {
-    image,
-    width: video.videoWidth,
-    height: video.videoHeight,
-    facesBounds,
-    hands: hands.map((hand) => ({
-      landmarks: hand.landmarks,
-    })),
-  });
-  setTimeout(execute, frameWait);
+    ipcRenderer.send('webcam:data', {
+      image,
+      width: video.videoWidth,
+      height: video.videoHeight,
+      facesBounds,
+      hands: hands.map((hand) => ({
+        landmarks: hand.landmarks,
+      })),
+    });
+    ipcRenderer.send('webcam:execute-error', false);
+  } catch (error) {
+    ipcRenderer.send('webcam:execute-error', true);
+  } finally {
+    setTimeout(execute, frameWait);
+  }
 }
 
 async function loadModels() {
