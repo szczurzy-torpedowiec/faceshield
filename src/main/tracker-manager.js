@@ -18,9 +18,9 @@ export default class TrackerManager extends EventEmitter {
   initKinect() {
     this.kinect = new Kinect();
     this.kinect.on('preview-update', (args) => this.emit('preview-update', args));
-    this.kinect.on('skeleton-update', (args) => {
-      this.detectTouching([args.head], args.hands, 50, true);
-      this.emit('skeleton-update', args);
+    this.kinect.on('skeleton-update', (skeleton) => {
+      this.detectTouchingKinect(skeleton);
+      this.emit('skeleton-update', skeleton);
     });
   }
 
@@ -91,21 +91,7 @@ export default class TrackerManager extends EventEmitter {
     await this.start();
   }
 
-  detectTouching(touchAreas, touchJoints, waitFrames, reverseY = false) {
-    let touching = false;
-    touchAreas.forEach((touchArea) => {
-      touchJoints.forEach((touchJoint) => {
-        if (reverseY) {
-          if (
-            (touchJoint.x > touchArea.x && touchJoint.x < (touchArea.x + touchArea.dx))
-            && (touchJoint.y < touchArea.y && touchJoint.y > (touchArea.y + touchArea.dy))
-          ) touching = true;
-        } else if (
-          (touchJoint.x > touchArea.x && touchJoint.x < (touchArea.x + touchArea.dx))
-            && (touchJoint.y > touchArea.y && touchJoint.y < (touchArea.y + touchArea.dy))
-        ) touching = true;
-      });
-    });
+  handleTouching(touching, waitFrames) {
     this.lastTouches.push(touching);
     if (this.lastTouches.length > waitFrames) this.lastTouches.shift();
     if (this.lastTouches.filter((touch) => touch).length > waitFrames * 0.5) {
@@ -125,27 +111,29 @@ export default class TrackerManager extends EventEmitter {
     }
   }
 
+  detectTouchingKinect(skeleton) {
+    let touching = false;
+    skeleton.hands.forEach((hand) => {
+      if (
+        (hand.x >= skeleton.head.x && hand.x <= (skeleton.head.x + skeleton.head.dx))
+        && (hand.y <= skeleton.head.y && hand.y >= (skeleton.head.y + skeleton.head.dy))
+      ) touching = true;
+    });
+    this.handleTouching(touching, 50);
+  }
+
   detectTouchingWebcam(data) {
-    if (data) {
-      const touchAreas = [];
-      const touchJoints = [];
-      data.facesBounds.forEach((faceBounds) => {
-        touchAreas.push({
-          x: faceBounds.left,
-          y: faceBounds.bottom,
-          dx: faceBounds.right - faceBounds.left,
-          dy: faceBounds.bottom - faceBounds.top,
-        });
+    if (!data) return;
+    const touchJoints = data.hands.flatMap((hand) => hand.landmarks);
+
+    let touching = false;
+    data.facesBounds.forEach(({
+      top, bottom, left, right,
+    }) => {
+      touchJoints.forEach(([x, y]) => {
+        if ((x >= left && x <= right) && (y >= top && y <= bottom)) touching = true;
       });
-      data.hands.forEach((hand) => {
-        hand.landmarks.forEach((joint) => {
-          touchJoints.push({
-            x: joint[0],
-            y: joint[1],
-          });
-        });
-      });
-      this.detectTouching(touchAreas, touchJoints, 15);
-    }
+    });
+    this.handleTouching(touching, 5);
   }
 }
