@@ -81,7 +81,7 @@ trackerManager.on('webcam-data-update', (data) => {
   if (win !== null) rendererCommunication.updateWebcamData(win, data);
 });
 trackerManager.on('touching-update', (touching) => {
-  if(trackerManager.trackingActive) {
+  if (trackerManager.trackingActive) {
     if (overlayWin !== null) overlayCommunication.setTouching(overlayWin, touching);
   }
   if (win !== null) rendererCommunication.setTouchingPreview(win, touching);

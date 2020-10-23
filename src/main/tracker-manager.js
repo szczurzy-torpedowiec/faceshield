@@ -19,7 +19,7 @@ export default class TrackerManager extends EventEmitter {
     this.kinect = new Kinect();
     this.kinect.on('preview-update', (args) => this.emit('preview-update', args));
     this.kinect.on('skeleton-update', (args) => {
-      this.detectTouching([args.head], args.hands, 50,true);
+      this.detectTouching([args.head], args.hands, 50, true);
       this.emit('skeleton-update', args);
     });
   }
@@ -30,7 +30,7 @@ export default class TrackerManager extends EventEmitter {
     });
     this.webcam.on('data-update', (data) => {
       this.detectTouchingWebcam(data);
-      this.emit('webcam-data-update', data)
+      this.emit('webcam-data-update', data);
     });
   }
 
@@ -93,30 +93,28 @@ export default class TrackerManager extends EventEmitter {
 
   detectTouching(touchAreas, touchJoints, waitFrames, reverseY = false) {
     let touching = false;
-    touchAreas.forEach(touchArea => {
-      touchJoints.forEach(touchJoint => {
-        if(reverseY) {
+    touchAreas.forEach((touchArea) => {
+      touchJoints.forEach((touchJoint) => {
+        if (reverseY) {
           if (
             (touchJoint.x > touchArea.x && touchJoint.x < (touchArea.x + touchArea.dx))
             && (touchJoint.y < touchArea.y && touchJoint.y > (touchArea.y + touchArea.dy))
           ) touching = true;
-        } else {
-          if (
-            (touchJoint.x > touchArea.x && touchJoint.x < (touchArea.x + touchArea.dx))
+        } else if (
+          (touchJoint.x > touchArea.x && touchJoint.x < (touchArea.x + touchArea.dx))
             && (touchJoint.y > touchArea.y && touchJoint.y < (touchArea.y + touchArea.dy))
-          ) touching = true;
-        }
+        ) touching = true;
       });
     });
     this.lastTouches.push(touching);
-    if(this.lastTouches.length > waitFrames) this.lastTouches.shift();
-    if(this.lastTouches.filter((touch) => !!touch).length > waitFrames * 0.5) {
-      if(!this.lastTouchingStatus && this.trackingActive) {
-        const touches = this.store.get('touches')
+    if (this.lastTouches.length > waitFrames) this.lastTouches.shift();
+    if (this.lastTouches.filter((touch) => touch).length > waitFrames * 0.5) {
+      if (!this.lastTouchingStatus && this.trackingActive) {
+        const touches = this.store.get('touches');
         touches.push({
           timestamp: Date.now(),
-        })
-        this.store.set('touches', touches)
+        });
+        this.store.set('touches', touches);
         this.emit('ding');
       }
       this.lastTouchingStatus = true;
@@ -128,10 +126,10 @@ export default class TrackerManager extends EventEmitter {
   }
 
   detectTouchingWebcam(data) {
-    if(data) {
-      const touchAreas = []
-      const touchJoints = []
-      data.facesBounds.forEach(faceBounds => {
+    if (data) {
+      const touchAreas = [];
+      const touchJoints = [];
+      data.facesBounds.forEach((faceBounds) => {
         touchAreas.push({
           x: faceBounds.left,
           y: faceBounds.bottom,
@@ -145,7 +143,7 @@ export default class TrackerManager extends EventEmitter {
             x: joint[0],
             y: joint[1],
           });
-        })
+        });
       });
       this.detectTouching(touchAreas, touchJoints, 15);
     }

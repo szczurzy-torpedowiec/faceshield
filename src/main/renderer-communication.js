@@ -102,6 +102,6 @@ export default class RendererCommunication extends EventEmitter {
   }
 
   setTouchingPreview(win, touching) {
-    win.webContents.send('set-touching-preview', touching)
+    win.webContents.send('set-touching-preview', touching);
   }
 }

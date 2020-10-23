@@ -47,11 +47,11 @@ const schema = {
       type: 'object',
       properties: {
         timestamp: {
-          type: 'number'
-        }
-      }
-    }
-  }
+          type: 'number',
+        },
+      },
+    },
+  },
 };
 
 const defaults = {
@@ -65,7 +65,7 @@ const defaults = {
   useCpuBackend: false,
   webcamFrameWait: 0,
   alertVolume: 1,
-  touches: []
+  touches: [],
 };
 
 const store = new Store({

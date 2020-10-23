@@ -518,7 +518,7 @@
         this.webcamData = data;
         this.drawWebcamSkeleton();
       });
-      window.ipcRenderer.on('set-touching-preview', (event, touching) => this.touching = touching);
+      window.ipcRenderer.on('set-touching-preview', (event, touching) => { this.touching = touching; });
       this.playAlertDebounced = _.debounce(this.playAlert, 350);
     },
     methods: {
