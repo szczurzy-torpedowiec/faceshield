@@ -16,6 +16,7 @@ export default new Vuex.Store({
     webcamModelsError: null,
     webcamCameraError: null,
     webcamExecuteError: null,
+    alertVolume: null,
   },
   mutations: {
     setAutostartConfig(state, config) {
@@ -48,6 +49,9 @@ export default new Vuex.Store({
     },
     setWebcamExecuteError(state, error) {
       state.webcamExecuteError = error;
+    },
+    setAlertVolume(state, volume) {
+      state.alertVolume = volume;
     },
   },
   actions: {

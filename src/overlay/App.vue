@@ -33,21 +33,14 @@
     data: () => ({
       touching: false,
       audio: new Audio(ding),
-      volume: 1,
     }),
-    watch: {
-      volume: {
-        handler(value) {
-          this.audio.volume = value;
-        },
-        immediate: true,
-      },
-    },
     created() {
       window.ipcRenderer.on('overlay:set-touching', (event, touching) => {
         this.touching = touching;
       });
-      window.ipcRenderer.on('overlay:ding', () => {
+      window.ipcRenderer.on('overlay:ding', (event, { volume }) => {
+        this.audio.volume = volume;
+        this.audio.currentTime = 0;
         this.audio.play();
       });
     },

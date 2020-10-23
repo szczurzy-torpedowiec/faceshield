@@ -35,6 +35,9 @@ const schema = {
   webcamFrameWait: {
     type: 'number',
   },
+  alertVolume: {
+    type: 'number',
+  },
 };
 
 const defaults = {
@@ -47,6 +50,7 @@ const defaults = {
   tracker: 'webcam',
   useCpuBackend: false,
   webcamFrameWait: 0,
+  alertVolume: 1,
 };
 
 const store = new Store({
