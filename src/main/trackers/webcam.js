@@ -59,6 +59,7 @@ class Webcam extends EventEmitter {
   }
 
   setFrameWait(wait) {
+    if (this.window === null) return;
     this.window.webContents.send('webcam:frame-wait-changed', wait);
   }
 
