@@ -38,6 +38,20 @@ const schema = {
   alertVolume: {
     type: 'number',
   },
+  alertOverlay: {
+    type: 'boolean',
+  },
+  touches: {
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        timestamp: {
+          type: 'number'
+        }
+      }
+    }
+  }
 };
 
 const defaults = {
@@ -51,6 +65,7 @@ const defaults = {
   useCpuBackend: false,
   webcamFrameWait: 0,
   alertVolume: 1,
+  touches: []
 };
 
 const store = new Store({

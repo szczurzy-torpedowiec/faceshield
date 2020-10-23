@@ -70,8 +70,8 @@ class CommunicationPlugin {
     window.ipcRenderer.send('set-tracker', tracker);
   }
 
-  setAlertVolume(tracker) {
-    window.ipcRenderer.send('set-alert-volume', tracker);
+  setAlertVolume(volume) {
+    window.ipcRenderer.send('set-alert-volume', volume);
   }
 
   async install(Vue, options) {
@@ -122,6 +122,7 @@ class CommunicationPlugin {
       setWebcamFrameWait: this.setWebcamFrameWait,
       setTracker: this.setTracker,
       setAlertVolume: this.setAlertVolume,
+      setAlertOverlay: this.setAlertOverlay,
     };
   }
 }

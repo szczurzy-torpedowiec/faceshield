@@ -243,14 +243,14 @@
               Hands not detected
             </preview-alert>
             <preview-alert
-              :value="previewActive"
+              :value="previewActive && !touching"
               color="blue"
               icon="mdi-emoticon"
             >
               Hands aren't touching face
             </preview-alert>
             <preview-alert
-              :value="previewActive"
+              :value="previewActive && touching"
               color="deep-orange"
               icon="mdi-emoticon-sad"
             >
@@ -425,6 +425,7 @@
       skeleton: null,
       alertAudio: new Audio(ding),
       playAlertDebounced: null,
+      touching: false,
     }),
     computed: {
       autostartConfig() {
@@ -517,6 +518,7 @@
         this.webcamData = data;
         this.drawWebcamSkeleton();
       });
+      window.ipcRenderer.on('set-touching-preview', (event, touching) => this.touching = touching);
       this.playAlertDebounced = _.debounce(this.playAlert, 350);
     },
     methods: {
@@ -571,10 +573,7 @@
 
         const ctx = this.$refs.previewSkeleton.getContext('2d');
         ctx.clearRect(0, 0, 320, this.height);
-        const hands = [
-          this.skeleton.handLeft,
-          this.skeleton.handRight,
-        ].filter((hand) => !!hand);
+        const hands = this.skeleton.hands.filter((hand) => !!hand);
         ctx.fillStyle = '#0c0';
         hands.forEach((hand) => {
           ctx.beginPath();
@@ -589,14 +588,14 @@
           ctx.closePath();
           ctx.fill();
         });
-        if (this.skeleton.headTopLeft && this.skeleton.headBottomRight) {
+        if (this.skeleton.head) {
           ctx.strokeStyle = '#049';
           ctx.lineWidth = 3;
           ctx.strokeRect(
-            this.skeleton.headTopLeft.x * this.scale,
-            this.skeleton.headTopLeft.y * this.scale,
-            (this.skeleton.headTopLeft.y - this.skeleton.headBottomRight.y) * this.scale,
-            (this.skeleton.headBottomRight.y - this.skeleton.headTopLeft.y) * this.scale,
+            this.skeleton.head.x * this.scale,
+            this.skeleton.head.y * this.scale,
+            this.skeleton.head.dx * this.scale,
+            this.skeleton.head.dy * this.scale,
           );
         }
       },

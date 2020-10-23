@@ -100,4 +100,8 @@ export default class RendererCommunication extends EventEmitter {
   setWebcamExecuteError(win, error) {
     win.webContents.send('webcam-execute-error-changed', error);
   }
+
+  setTouchingPreview(win, touching) {
+    win.webContents.send('set-touching-preview', touching)
+  }
 }
