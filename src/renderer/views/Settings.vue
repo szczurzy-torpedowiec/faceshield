@@ -318,102 +318,22 @@
         </v-list-item>
       </v-list>
     </v-card>
-    <v-card
-      outlined
-      class="mt-4"
-    >
-      <v-card-title>
-        Alerts
-      </v-card-title>
-      <v-list>
-        <v-list-item link>
-          <v-list-item-title>
-            Show alerts overlay
-          </v-list-item-title>
-          <v-list-item-action>
-            <v-switch
-              :input-value="false"
-              readonly
-            />
-          </v-list-item-action>
-        </v-list-item>
-        <v-list-item
-          class="d-block"
-        >
-          <div class="d-flex align-center">
-            <v-list-item-content class="overflow-visible">
-              <v-list-item-title>
-                Touch alert volume
-              </v-list-item-title>
-            </v-list-item-content>
-            <v-list-item-action-text v-if="alertVolume === 0">
-              Disabled
-            </v-list-item-action-text>
-            <v-list-item-action-text v-else>
-              {{ alertVolume === null ? '--' : Math.round(alertVolume * 100) }}%
-            </v-list-item-action-text>
-          </div>
-          <v-slider
-            :value="alertVolume"
-            :disabled="alertVolume === null"
-            dense
-            hide-details
-            min="0"
-            max="1"
-            step="0.01"
-            thumb-label
-            prepend-icon="mdi-volume-low"
-            append-icon="mdi-volume-high"
-            thumb-size="36"
-            @click:prepend="decreaseAlertVolume"
-            @click:append="increaseAlertVolume"
-            @change="setAlertVolume"
-          >
-            <template #thumb-label="{ value }">
-              <v-icon
-                v-if="value === 0"
-                small
-                dark
-              >
-                mdi-volume-off
-              </v-icon>
-              <span v-else>{{ Math.round(value * 100) }}%</span>
-            </template>
-          </v-slider>
-        </v-list-item>
-        <v-list-item link>
-          <v-list-item-content>
-            <v-list-item-title>
-              Enable false alert shortcut
-            </v-list-item-title>
-            <v-list-item-subtitle>
-              Press Ctrl + Alt + F to remove previous touch from history
-            </v-list-item-subtitle>
-          </v-list-item-content>
-          <v-list-item-action>
-            <v-switch
-              :input-value="false"
-              readonly
-            />
-          </v-list-item-action>
-        </v-list-item>
-      </v-list>
-    </v-card>
+    <alert-settings class="mt-4" />
   </div>
 </template>
 
 <script>
-  import _ from 'lodash';
   import PreviewAlert from '../components/settings/PreviewAlert.vue';
   import ControlTile from '../components/ControlTile.vue';
   import VideoInputSelect from '../components/settings/VideoInputSelect.vue';
-  import ding from '../../assets/face-touch-ding.wav';
+  import AlertSettings from '../components/settings/AlertSettings.vue';
 
   export default {
     components: {
       PreviewAlert,
       ControlTile,
       VideoInputSelect,
+      AlertSettings,
     },
     beforeRouteLeave(to, from, next) {
       this.$comm.stopPreview();
@@ -423,8 +343,6 @@
       kinectImage: null,
       webcamData: null,
       skeleton: null,
-      alertAudio: new Audio(ding),
-      playAlertDebounced: null,
     }),
     computed: {
       autostartConfig() {
@@ -479,9 +397,6 @@
         if (this.tracker !== 'webcam') return null;
         return this.$store.state.webcamExecuteError;
       },
-      alertVolume() {
-        return this.$store.state.alertVolume;
-      },
       handsNotDetected() {
         if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.hands.length === 0;
         if (this.tracker === 'kinect' && this.skeleton !== null) {
@@ -517,7 +432,6 @@
         this.webcamData = data;
         this.drawWebcamSkeleton();
       });
-      this.playAlertDebounced = _.debounce(this.playAlert, 350);
     },
     methods: {
       toggleAutostartEnabled() {
@@ -543,22 +457,6 @@
       },
       setWebcamFrameWait(wait) {
         this.$comm.setWebcamFrameWait(wait);
-      },
-      setAlertVolume(value) {
-        this.$comm.setAlertVolume(value);
-        this.playAlertDebounced();
-      },
-      decreaseAlertVolume() {
-        this.setAlertVolume(Math.max((Math.ceil(this.alertVolume * 20) - 1) / 20, 0));
-      },
-      increaseAlertVolume() {
-        this.setAlertVolume(Math.min((Math.floor(this.alertVolume * 20) + 1) / 20, 1));
-      },
-      playAlert() {
-        if (this.alertVolume === 0) return;
-        this.alertAudio.volume = this.alertVolume;
-        this.alertAudio.currentTime = 0;
-        this.alertAudio.play();
       },
       startPreview() {
         this.$comm.startPreview();
