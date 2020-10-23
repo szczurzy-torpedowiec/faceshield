@@ -29,6 +29,9 @@ class CommunicationPlugin {
 
     const webcamExecuteError = await window.ipcRenderer.invoke('get-webcam-execute-error');
     this.store.commit('setWebcamExecuteError', webcamExecuteError);
+
+    const alertVolume = await window.ipcRenderer.invoke('get-alert-volume');
+    this.store.commit('setAlertVolume', alertVolume);
   }
 
   setAutostartConfig(config) {
@@ -67,6 +70,10 @@ class CommunicationPlugin {
     window.ipcRenderer.send('set-tracker', tracker);
   }
 
+  setAlertVolume(tracker) {
+    window.ipcRenderer.send('set-alert-volume', tracker);
+  }
+
   async install(Vue, options) {
     this.store = options.store;
     window.ipcRenderer.on('autostart-config-changed', (event, config) => {
@@ -99,6 +106,9 @@ class CommunicationPlugin {
     window.ipcRenderer.on('webcam-execute-error-changed', (event, error) => {
       this.store.commit('setWebcamExecuteError', error);
     });
+    window.ipcRenderer.on('alert-volume-changed', (event, volume) => {
+      this.store.commit('setAlertVolume', volume);
+    });
 
     await this.init();
     Vue.prototype.$comm = {
@@ -111,6 +121,7 @@ class CommunicationPlugin {
       setUseCpuBackend: this.setUseCpuBackend,
       setWebcamFrameWait: this.setWebcamFrameWait,
       setTracker: this.setTracker,
+      setAlertVolume: this.setAlertVolume,
     };
   }
 }

@@ -25,16 +25,23 @@
 
 <script>
   import KeyboardKey from './components/KeyboardKey.vue';
+  import ding from '../assets/face-touch-ding.wav';
 
   export default {
     name: 'App',
     components: { KeyboardKey },
     data: () => ({
       touching: false,
+      audio: new Audio(ding),
     }),
     created() {
       window.ipcRenderer.on('overlay:set-touching', (event, touching) => {
         this.touching = touching;
+      });
+      window.ipcRenderer.on('overlay:ding', (event, { volume }) => {
+        this.audio.volume = volume;
+        this.audio.currentTime = 0;
+        this.audio.play();
       });
     },
   };

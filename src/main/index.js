@@ -67,7 +67,9 @@ rendererCommunication.on('tracker-changed', async (tracker) => {
   await trackerManager.setTracker(tracker);
 });
 
-// const overlayCommunication = new OverlayCommunication();
+const overlayCommunication = new OverlayCommunication({
+  store,
+});
 
 trackerManager.on('preview-update', (args) => {
   if (win !== null) rendererCommunication.updatePreview(win, args);
