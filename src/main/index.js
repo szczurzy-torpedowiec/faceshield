@@ -7,7 +7,7 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import path from 'path';
 import parseArgs from 'minimist';
-import store from './store';
+import configStore from './stores/config';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
 import TrackerManager from './tracker-manager';
@@ -21,20 +21,15 @@ let win = null;
 let overlayWin = null;
 let tray = null;
 
-const trackerManager = new TrackerManager({
-  store,
-});
+const trackerManager = new TrackerManager();
 const rendererCommunication = new RendererCommunication({
-  store,
   getTrackingActive: () => trackerManager.trackingActive,
   getPreviewActive: () => trackerManager.previewActive,
   getWebcamModelsError: () => trackerManager.webcam.modelsError,
   getWebcamCameraError: () => trackerManager.webcam.cameraError,
   getWebcamExecuteError: () => trackerManager.webcam.executeError,
 });
-const overlayCommunication = new OverlayCommunication({
-  store,
-});
+const overlayCommunication = new OverlayCommunication();
 
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
@@ -113,6 +108,8 @@ app.commandLine.appendSwitch('persist-user-preferences');
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
+
+console.log(app.getPath('userData'));
 
 function createWindow() {
   // Create the browser window.
@@ -222,12 +219,12 @@ if (instanceLock) {
         '--autostart',
       ],
     });
-    if (process.platform === 'darwin') store.set('autostart.minimise', loginItemSettings.openAsHidden);
+    if (process.platform === 'darwin') configStore.set('autostart.minimise', loginItemSettings.openAsHidden);
     if (argv.autostart) {
-      if (store.get('autostart.startTracking')) {
+      if (configStore.get('autostart.startTracking')) {
         await trackerManager.startTracking();
       }
-      if (!store.get('autostart.minimise')) createWindow();
+      if (!configStore.get('autostart.minimise')) createWindow();
     } else {
       createWindow();
     }

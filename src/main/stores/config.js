@@ -1,6 +1,7 @@
 import Store from 'electron-store';
 
 const schema = {
+  additionalProperties: false,
   autostart: {
     type: 'object',
     properties: {
@@ -41,53 +42,6 @@ const schema = {
   alertVolume: {
     type: 'number',
   },
-  touches: {
-    type: 'array',
-    items: {
-      type: 'object',
-      properties: {
-        timestamp: {
-          type: 'number',
-        },
-      },
-    },
-  },
-  activeTimes: {
-    type: 'array',
-    items: {
-      type: 'object',
-      properties: {
-        startTimestamp: {
-          type: 'number',
-        },
-        endTimestamp: {
-          type: 'number',
-        },
-        duration: {
-          type: 'number',
-          description: 'Duration in milliseconds',
-        },
-      },
-    },
-  },
-  lastActiveTime: {
-    anyOf: [
-      {
-        type: 'null',
-      },
-      {
-        type: 'object',
-        properties: {
-          startTimestamp: {
-            type: 'number',
-          },
-          endTimestamp: {
-            type: 'number',
-          },
-        },
-      },
-    ],
-  },
 };
 
 const defaults = {
@@ -102,14 +56,12 @@ const defaults = {
   webcamFrameWait: 0,
   overlayAlertsEnabled: true,
   alertVolume: 1,
-  touches: [],
-  activeTimes: [],
-  lastActiveTime: null,
 };
 
-const store = new Store({
+const configStore = new Store({
   schema,
   defaults,
+  name: 'config',
 });
 
-export default store;
+export default configStore;

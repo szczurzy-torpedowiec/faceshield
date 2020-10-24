@@ -1,40 +1,41 @@
 import { EventEmitter } from 'events';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
+import configStore from './stores/config';
+import trackingStore from './stores/tracking';
 
 export default class TrackerManager extends EventEmitter {
-  constructor(options) {
+  constructor() {
     super();
     this.lastTouches = [];
     this.lastTouchingStatus = false;
     this.trackingActive = false;
     this.previewActive = false;
-    this.store = options.store;
     this.faceDetectStreak = 0;
 
     this.checkLastActiveTime();
     setInterval(() => this.checkLastActiveTime(), 1000);
 
-    this.tracker = this.store.get('tracker');
+    this.tracker = configStore.get('tracker');
     this.initKinect();
     this.initWebcam();
   }
 
   checkLastActiveTime() {
-    const lastActiveTime = this.store.get('lastActiveTime');
+    const lastActiveTime = trackingStore.get('lastActiveTime');
     if (lastActiveTime === null) return;
     const timeSinceEnd = new Date().getTime() - lastActiveTime.endTimestamp;
     if (timeSinceEnd < 10000) return;
-    this.store.set('lastActiveTime', null);
+    trackingStore.set('lastActiveTime', null);
 
     const duration = lastActiveTime.endTimestamp - lastActiveTime.startTimestamp;
     if (duration >= 10000) {
-      const activeTimes = this.store.get('activeTimes');
+      const activeTimes = trackingStore.get('activeTimes');
       activeTimes.push({
         ...lastActiveTime,
         duration,
       });
-      this.store.set('activeTimes', activeTimes);
+      trackingStore.set('activeTimes', activeTimes);
     }
   }
 
@@ -46,14 +47,14 @@ export default class TrackerManager extends EventEmitter {
     this.faceDetectStreak += 1;
     if (this.faceDetectStreak < 3) return;
 
-    const lastActiveTime = this.store.get('lastActiveTime');
+    const lastActiveTime = trackingStore.get('lastActiveTime');
     const endTimestamp = new Date().getTime();
     if (lastActiveTime === null) {
-      this.store.set('lastActiveTime', {
+      trackingStore.set('lastActiveTime', {
         startTimestamp: endTimestamp,
         endTimestamp,
       });
-    } else this.store.set('lastActiveTime.endTimestamp', endTimestamp);
+    } else trackingStore.set('lastActiveTime.endTimestamp', endTimestamp);
   }
 
   initKinect() {
@@ -66,9 +67,7 @@ export default class TrackerManager extends EventEmitter {
   }
 
   initWebcam() {
-    this.webcam = new Webcam({
-      store: this.store,
-    });
+    this.webcam = new Webcam();
     this.webcam.on('data-update', (data) => {
       this.detectTouchingWebcam(data);
       this.emit('webcam-data-update', data);
@@ -143,11 +142,11 @@ export default class TrackerManager extends EventEmitter {
     if (this.lastTouches.filter((touch) => touch.touching).length > this.lastTouches.length * 0.5
       && this.lastTouches.length > 1) {
       if (!this.lastTouchingStatus && this.trackingActive) {
-        const touches = this.store.get('touches');
+        const touches = trackingStore.get('touches');
         touches.push({
           timestamp: Date.now(),
         });
-        this.store.set('touches', touches);
+        trackingStore.set('touches', touches);
         this.emit('ding');
       }
       this.lastTouchingStatus = true;
