@@ -8,4 +8,13 @@ export default new Vuetify({
   icons: {
     iconfont: 'mdi',
   },
+  theme: {
+    themes: {
+      light: {
+        primary: '#1A8FE3',
+        secondary: '#1A8FE3',
+        accent: '#1A8FE3',
+      },
+    },
+  },
 });
