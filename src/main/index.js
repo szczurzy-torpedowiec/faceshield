@@ -50,6 +50,7 @@ rendererCommunication.on('start-tracking', async () => {
 });
 rendererCommunication.on('pause-tracking', async () => {
   trackerManager.stopTracking();
+  overlayCommunication.setTouching(overlayWin, false);
 });
 rendererCommunication.on('start-preview', async () => {
   await trackerManager.startPreview();
