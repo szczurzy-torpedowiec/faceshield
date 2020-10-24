@@ -1,11 +1,13 @@
 import { EventEmitter } from 'events';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
+import { fork } from 'child_process'
 
 export default class TrackerManager extends EventEmitter {
   constructor(options) {
     super();
     this.lastTouches = [];
+    this.imageFrames = [];
     this.lastTouchingStatus = false;
     this.trackingActive = false;
     this.previewActive = false;
@@ -13,11 +15,15 @@ export default class TrackerManager extends EventEmitter {
     this.tracker = this.store.get('tracker');
     this.initKinect();
     this.initWebcam();
+    this.gifSavePath = options.gifSavePath
   }
 
   initKinect() {
     this.kinect = new Kinect();
-    this.kinect.on('preview-update', (args) => this.emit('preview-update', args));
+    this.kinect.on('preview-update', (data) => {
+      this.saveFrame(data)
+      this.emit('preview-update', data)
+    });
     this.kinect.on('skeleton-update', (skeleton) => {
       this.detectTouchingKinect(skeleton);
       this.emit('skeleton-update', skeleton);
@@ -96,7 +102,6 @@ export default class TrackerManager extends EventEmitter {
       touching,
       timestamp: Date.now(),
     });
-    // if (this.lastTouches.length > waitFrames) this.lastTouches.shift();
     this.lastTouches = this.lastTouches.filter((touchObj) => touchObj.timestamp > Date.now() - 500);
     if (this.lastTouches.filter((touch) => touch.touching).length > this.lastTouches.length * 0.5
       && this.lastTouches.length > 1) {
@@ -107,6 +112,7 @@ export default class TrackerManager extends EventEmitter {
         });
         this.store.set('touches', touches);
         this.emit('ding');
+        this.saveGif();
       }
       this.lastTouchingStatus = true;
       this.emit('touching-update', true);
@@ -129,6 +135,7 @@ export default class TrackerManager extends EventEmitter {
 
   detectTouchingWebcam(data) {
     if (!data) return;
+    this.saveFrame(data.image)
     const touchJoints = data.hands.flatMap((hand) => hand.landmarks);
 
     let touching = false;
@@ -140,5 +147,21 @@ export default class TrackerManager extends EventEmitter {
       });
     });
     this.handleTouching(touching, 5);
+  }
+
+  saveFrame(data) {
+    this.imageFrames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 10000)
+    this.imageFrames.push({
+      timestamp: Date.now(),
+      data: data
+    })
+  }
+
+  saveGif() {
+    const encoderProcess = fork('./gifEncoder.js')
+    encoderProcess.send({
+      imageFrames: this.imageFrames,
+      path: this.gifSavePath
+    });
   }
 }

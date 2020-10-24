@@ -21,8 +21,11 @@ let win = null;
 let overlayWin = null;
 let tray = null;
 
+const gifSavePath = app.getPath('userData')
+console.log(gifSavePath)
 const trackerManager = new TrackerManager({
   store,
+  gifSavePath
 });
 const rendererCommunication = new RendererCommunication({
   store,

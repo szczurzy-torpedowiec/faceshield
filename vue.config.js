@@ -45,6 +45,7 @@ module.exports = {
             from: 'modules/FaceShieldKinectModule/FaceShieldKinectModule/bin/Release',
             to: 'modules/FaceShieldKinectModule',
           },
+          'gifEncoder.js'
         ],
       },
     },
