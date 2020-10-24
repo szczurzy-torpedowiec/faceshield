@@ -5,20 +5,62 @@ import jimp from 'jimp';
 import fs from 'fs';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
+import configStore from './stores/config';
+import trackingStore from './stores/tracking';
 
 export default class TrackerManager extends EventEmitter {
   constructor(options) {
     super();
+    this.gifSaveFolder = options.gifSaveFolder;
     this.lastTouches = [];
     this.imageFrames = [];
     this.lastTouchingStatus = false;
     this.trackingActive = false;
     this.previewActive = false;
-    this.store = options.store;
-    this.tracker = this.store.get('tracker');
+    this.faceDetectStreak = 0;
+
+    this.checkLastActiveTime();
+    setInterval(() => this.checkLastActiveTime(), 1000);
+
+    this.tracker = configStore.get('tracker');
     this.initKinect();
     this.initWebcam();
-    this.gifSaveFolder = options.gifSaveFolder;
+  }
+
+  checkLastActiveTime() {
+    const lastActiveTime = trackingStore.get('lastActiveTime');
+    if (lastActiveTime === null) return;
+    const timeSinceEnd = new Date().getTime() - lastActiveTime.endTimestamp;
+    if (timeSinceEnd < 10000) return;
+    trackingStore.set('lastActiveTime', null);
+
+    const duration = lastActiveTime.endTimestamp - lastActiveTime.startTimestamp;
+    if (duration >= 10000) {
+      const activeTimes = trackingStore.get('activeTimes');
+      activeTimes.push({
+        ...lastActiveTime,
+        duration,
+      });
+      trackingStore.set('activeTimes', activeTimes);
+    }
+  }
+
+  updateActiveTime(detected) {
+    if (!detected || !this.trackingActive) {
+      this.faceDetectStreak = 0;
+      return;
+    }
+    this.faceDetectStreak += 1;
+    if (this.faceDetectStreak < 3) return;
+
+    const lastActiveTime = trackingStore.get('lastActiveTime');
+    const endTimestamp = new Date().getTime();
+    if (lastActiveTime === null) {
+      trackingStore.set('lastActiveTime', {
+        startTimestamp: endTimestamp,
+        endTimestamp,
+      });
+    } else trackingStore.set('lastActiveTime.endTimestamp', endTimestamp);
   }
 
   initKinect() {
@@ -34,9 +76,7 @@ export default class TrackerManager extends EventEmitter {
   }
 
   initWebcam() {
-    this.webcam = new Webcam({
-      store: this.store,
-    });
+    this.webcam = new Webcam();
     this.webcam.on('data-update', (data) => {
       this.detectTouchingWebcam(data);
       this.emit('webcam-data-update', data);
@@ -72,6 +112,7 @@ export default class TrackerManager extends EventEmitter {
     if (this.previewActive) return;
     this.stop();
     this.emit('touching-update', false);
+    this.updateActiveTime(false);
   }
 
   async startPreview() {
@@ -122,20 +163,30 @@ export default class TrackerManager extends EventEmitter {
 
   detectTouchingKinect(skeleton) {
     let touching = false;
-    skeleton.hands.forEach((hand) => {
-      if (
-        (hand.x >= skeleton.head.x && hand.x <= (skeleton.head.x + skeleton.head.dx))
+    if (skeleton.head) {
+      this.updateActiveTime(true);
+      skeleton.hands.forEach((hand) => {
+        if (
+          (hand.x >= skeleton.head.x && hand.x <= (skeleton.head.x + skeleton.head.dx))
         && (hand.y <= skeleton.head.y && hand.y >= (skeleton.head.y + skeleton.head.dy))
-      ) touching = true;
-    });
+        ) touching = true;
+      });
+    } else {
+      this.updateActiveTime(false);
+    }
     this.handleTouching(touching, 50);
   }
 
   detectTouchingWebcam(data) {
-    if (!data) return;
-    this.saveFrame(data.image);
-    const touchJoints = data.hands.flatMap((hand) => hand.landmarks);
+    if (!data) {
+      this.updateActiveTime(false);
+      return;
+    }
 
+    this.updateActiveTime(data.facesBounds.length > 0);
+    this.saveFrame(data.image);
+
+    const touchJoints = data.hands.flatMap((hand) => hand.landmarks);
     let touching = false;
     data.facesBounds.forEach(({
       top, bottom, left, right,
@@ -157,6 +208,7 @@ export default class TrackerManager extends EventEmitter {
 
   async saveGif(timestamp) {
     const frames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 5000);
+    if (frames.length === 0) return null;
     const gifFrames = await Promise.all(frames.map(async (frame) => {
       const buffer = Buffer.from(frame.data.split(',')[1], 'base64');
       const j = await jimp.read(buffer);
@@ -182,11 +234,11 @@ export default class TrackerManager extends EventEmitter {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       filePath = await this.saveGif(timestamp);
     }
-    const touches = this.store.get('touches');
+    const touches = trackingStore.get('touches');
     touches.push({
       timestamp,
-      gifPath: filePath,
+      gifPath: filePath.toString(),
     });
-    this.store.set('touches', touches);
+    trackingStore.set('touches', touches);
   }
 }

@@ -35,25 +35,11 @@ const schema = {
   webcamFrameWait: {
     type: 'number',
   },
-  alertVolume: {
-    type: 'number',
-  },
-  alertOverlay: {
+  overlayAlertsEnabled: {
     type: 'boolean',
   },
-  touches: {
-    type: 'array',
-    items: {
-      type: 'object',
-      properties: {
-        timestamp: {
-          type: 'number',
-        },
-        gifPath: {
-          type: 'string',
-        },
-      },
-    },
+  alertVolume: {
+    type: 'number',
   },
 };
 
@@ -67,13 +53,14 @@ const defaults = {
   tracker: 'webcam',
   useCpuBackend: false,
   webcamFrameWait: 0,
+  overlayAlertsEnabled: true,
   alertVolume: 1,
-  touches: [],
 };
 
-const store = new Store({
+const configStore = new Store({
   schema,
   defaults,
+  name: 'config',
 });
 
-export default store;
+export default configStore;

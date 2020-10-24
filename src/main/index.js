@@ -7,7 +7,7 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import path from 'path';
 import parseArgs from 'minimist';
-import store from './store';
+import configStore from './stores/config';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
 import TrackerManager from './tracker-manager';
@@ -23,17 +23,16 @@ let tray = null;
 
 const gifSaveFolder = path.join(app.getPath('userData'), 'recordings');
 const trackerManager = new TrackerManager({
-  store,
   gifSaveFolder,
 });
 const rendererCommunication = new RendererCommunication({
-  store,
   getTrackingActive: () => trackerManager.trackingActive,
   getPreviewActive: () => trackerManager.previewActive,
   getWebcamModelsError: () => trackerManager.webcam.modelsError,
   getWebcamCameraError: () => trackerManager.webcam.cameraError,
   getWebcamExecuteError: () => trackerManager.webcam.executeError,
 });
+const overlayCommunication = new OverlayCommunication();
 
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
@@ -49,6 +48,7 @@ rendererCommunication.on('start-tracking', async () => {
 });
 rendererCommunication.on('pause-tracking', async () => {
   trackerManager.stopTracking();
+  overlayCommunication.setTouching(overlayWin, false);
 });
 rendererCommunication.on('start-preview', async () => {
   await trackerManager.startPreview();
@@ -68,9 +68,12 @@ rendererCommunication.on('webcam-frame-wait-changed', (wait) => {
 rendererCommunication.on('tracker-changed', async (tracker) => {
   await trackerManager.setTracker(tracker);
 });
-
-const overlayCommunication = new OverlayCommunication({
-  store,
+rendererCommunication.on('overlay-alerts-enabled-changed', (enabled) => {
+  if (enabled) {
+    overlayCommunication.setTouching(overlayWin, trackerManager.lastTouchingStatus);
+  } else {
+    overlayCommunication.setTouching(overlayWin, false);
+  }
 });
 
 trackerManager.on('preview-update', (args) => {
@@ -108,6 +111,8 @@ app.commandLine.appendSwitch('persist-user-preferences');
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
+
+console.log(app.getPath('userData'));
 
 function createWindow() {
   // Create the browser window.
@@ -157,7 +162,7 @@ function createTray() {
       role: 'quit',
     },
   ]);
-  tray.setToolTip('Face Shield');
+  tray.setToolTip(process.env.WEBPACK_DEV_SERVER_URL ? 'Face Shield development' : `Face Shield v${app.getVersion()}`);
   tray.setContextMenu(contextMenu);
   tray.addListener('click', () => {
     if (win === null) {
@@ -217,12 +222,12 @@ if (instanceLock) {
         '--autostart',
       ],
     });
-    if (process.platform === 'darwin') store.set('autostart.minimise', loginItemSettings.openAsHidden);
+    if (process.platform === 'darwin') configStore.set('autostart.minimise', loginItemSettings.openAsHidden);
     if (argv.autostart) {
-      if (store.get('autostart.startTracking')) {
+      if (configStore.get('autostart.startTracking')) {
         await trackerManager.startTracking();
       }
-      if (!store.get('autostart.minimise')) createWindow();
+      if (!configStore.get('autostart.minimise')) createWindow();
     } else {
       createWindow();
     }
