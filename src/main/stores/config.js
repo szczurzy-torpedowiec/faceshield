@@ -57,10 +57,11 @@ const defaults = {
   alertVolume: 1,
 };
 
-const configStore = new Store({
-  schema,
-  defaults,
-  name: 'config',
-});
-
-export default configStore;
+export default function createConfigStore(path) {
+  return new Store({
+    schema,
+    defaults,
+    name: 'config',
+    cwd: path,
+  });
+}

@@ -7,13 +7,21 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import path from 'path';
 import parseArgs from 'minimist';
-import configStore from './stores/config';
+import createConfigStore from './stores/config';
+import createTrackingStore from './stores/tracking';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
 import TrackerManager from './tracker-manager';
 
 const argv = parseArgs(process.argv.slice(1));
 const isDevelopment = process.env.NODE_ENV !== 'production';
+
+if (isDevelopment) {
+  app.setPath('userData', path.join(app.getPath('appData'), `${app.getName()}-development`));
+}
+
+const configStore = createConfigStore(app.getPath('userData'));
+const trackingStore = createTrackingStore(app.getPath('userData'));
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -23,16 +31,21 @@ let tray = null;
 
 const gifSaveFolder = path.join(app.getPath('userData'), 'recordings');
 const trackerManager = new TrackerManager({
+  trackingStore,
+  configStore,
   gifSaveFolder,
 });
 const rendererCommunication = new RendererCommunication({
+  configStore,
   getTrackingActive: () => trackerManager.trackingActive,
   getPreviewActive: () => trackerManager.previewActive,
   getWebcamModelsError: () => trackerManager.webcam.modelsError,
   getWebcamCameraError: () => trackerManager.webcam.cameraError,
   getWebcamExecuteError: () => trackerManager.webcam.executeError,
 });
-const overlayCommunication = new OverlayCommunication();
+const overlayCommunication = new OverlayCommunication({
+  configStore,
+});
 
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
