@@ -4,7 +4,8 @@ export default class OverlayCommunication {
   }
 
   setTouching(win, touching) {
-    win.webContents.send('overlay:set-touching', touching);
+    const alertsEnabled = this.store.get('overlayAlertsEnabled');
+    win.webContents.send('overlay:set-touching', touching && alertsEnabled);
   }
 
   ding(win) {

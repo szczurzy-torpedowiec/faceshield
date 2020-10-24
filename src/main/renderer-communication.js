@@ -70,6 +70,13 @@ export default class RendererCommunication extends EventEmitter {
     ipcMain.handle('get-webcam-camera-error', () => this.getWebcamCameraError());
     ipcMain.handle('get-webcam-execute-error', () => this.getWebcamExecuteError());
 
+    ipcMain.handle('get-overlay-alerts-enabled', () => this.store.get('overlayAlertsEnabled'));
+    ipcMain.on('set-overlay-alerts-enabled', (event, enabled) => {
+      this.store.set('overlayAlertsEnabled', enabled);
+      event.sender.send('overlay-alerts-enabled-changed', enabled);
+      this.emit('overlay-alerts-enabled-changed', enabled);
+    });
+
     ipcMain.handle('get-alert-volume', () => this.store.get('alertVolume'));
     ipcMain.on('set-alert-volume', (event, volume) => {
       this.store.set('alertVolume', volume);

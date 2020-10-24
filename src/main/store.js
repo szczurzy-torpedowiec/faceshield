@@ -35,11 +35,11 @@ const schema = {
   webcamFrameWait: {
     type: 'number',
   },
+  overlayAlertsEnabled: {
+    type: 'boolean',
+  },
   alertVolume: {
     type: 'number',
-  },
-  alertOverlay: {
-    type: 'boolean',
   },
   touches: {
     type: 'array',
@@ -64,6 +64,7 @@ const defaults = {
   tracker: 'webcam',
   useCpuBackend: false,
   webcamFrameWait: 0,
+  overlayAlertsEnabled: true,
   alertVolume: 1,
   touches: [],
 };

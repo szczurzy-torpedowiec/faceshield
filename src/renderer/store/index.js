@@ -16,6 +16,7 @@ export default new Vuex.Store({
     webcamModelsError: null,
     webcamCameraError: null,
     webcamExecuteError: null,
+    overlayAlertsEnabled: null,
     alertVolume: null,
   },
   mutations: {
@@ -49,6 +50,9 @@ export default new Vuex.Store({
     },
     setWebcamExecuteError(state, error) {
       state.webcamExecuteError = error;
+    },
+    setOverlayAlertsEnabled(state, enabled) {
+      state.overlayAlertsEnabled = enabled;
     },
     setAlertVolume(state, volume) {
       state.alertVolume = volume;

@@ -32,6 +32,9 @@ const rendererCommunication = new RendererCommunication({
   getWebcamCameraError: () => trackerManager.webcam.cameraError,
   getWebcamExecuteError: () => trackerManager.webcam.executeError,
 });
+const overlayCommunication = new OverlayCommunication({
+  store,
+});
 
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
@@ -66,9 +69,12 @@ rendererCommunication.on('webcam-frame-wait-changed', (wait) => {
 rendererCommunication.on('tracker-changed', async (tracker) => {
   await trackerManager.setTracker(tracker);
 });
-
-const overlayCommunication = new OverlayCommunication({
-  store,
+rendererCommunication.on('overlay-alerts-enabled-changed', (enabled) => {
+  if (enabled) {
+    overlayCommunication.setTouching(overlayWin, trackerManager.lastTouchingStatus);
+  } else {
+    overlayCommunication.setTouching(overlayWin, false);
+  }
 });
 
 trackerManager.on('preview-update', (args) => {
