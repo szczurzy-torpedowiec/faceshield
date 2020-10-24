@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events';
+import { fork } from 'child_process';
+import path from 'path';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
-import { fork } from 'child_process'
 
 export default class TrackerManager extends EventEmitter {
   constructor(options) {
@@ -15,14 +16,14 @@ export default class TrackerManager extends EventEmitter {
     this.tracker = this.store.get('tracker');
     this.initKinect();
     this.initWebcam();
-    this.gifSavePath = options.gifSavePath
+    this.gifSaveFolder = options.gifSaveFolder;
   }
 
   initKinect() {
     this.kinect = new Kinect();
     this.kinect.on('preview-update', (data) => {
-      this.saveFrame(data)
-      this.emit('preview-update', data)
+      this.saveFrame(data);
+      this.emit('preview-update', data);
     });
     this.kinect.on('skeleton-update', (skeleton) => {
       this.detectTouchingKinect(skeleton);
@@ -106,13 +107,8 @@ export default class TrackerManager extends EventEmitter {
     if (this.lastTouches.filter((touch) => touch.touching).length > this.lastTouches.length * 0.5
       && this.lastTouches.length > 1) {
       if (!this.lastTouchingStatus && this.trackingActive) {
-        const touches = this.store.get('touches');
-        touches.push({
-          timestamp: Date.now(),
-        });
-        this.store.set('touches', touches);
         this.emit('ding');
-        this.saveGif();
+        this.saveTouch();
       }
       this.lastTouchingStatus = true;
       this.emit('touching-update', true);
@@ -135,7 +131,7 @@ export default class TrackerManager extends EventEmitter {
 
   detectTouchingWebcam(data) {
     if (!data) return;
-    this.saveFrame(data.image)
+    this.saveFrame(data.image);
     const touchJoints = data.hands.flatMap((hand) => hand.landmarks);
 
     let touching = false;
@@ -150,18 +146,40 @@ export default class TrackerManager extends EventEmitter {
   }
 
   saveFrame(data) {
-    this.imageFrames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 10000)
+    this.imageFrames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 10000);
     this.imageFrames.push({
       timestamp: Date.now(),
-      data: data
-    })
+      data,
+    });
   }
 
-  saveGif() {
-    const encoderProcess = fork('./gifEncoder.js')
-    encoderProcess.send({
-      imageFrames: this.imageFrames,
-      path: this.gifSavePath
-    });
+  saveTouch() {
+    // TODO: Nagrywanie włączone
+    if (true) {
+      setTimeout(async () => {
+        const frames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 5000);
+        const encoderProcess = fork('./gifEncoder.js');
+        const gifSavePath = path.join(this.gifSaveFolder, `${Date.now()}.gif`);
+        encoderProcess.send({
+          frames,
+          path: gifSavePath,
+        });
+        encoderProcess.on('message', (m) => {
+          const touches = this.store.get('touches');
+          touches.push({
+            timestamp: Date.now(),
+            gifPath: m.filePath,
+          });
+          this.store.set('touches', touches);
+        });
+      }, 1500);
+    } else {
+      const touches = this.store.get('touches');
+      touches.push({
+        timestamp: Date.now(),
+        gifPath: null,
+      });
+      this.store.set('touches', touches);
+    }
   }
 }
