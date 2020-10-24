@@ -9,6 +9,9 @@ const schema = {
         timestamp: {
           type: 'number',
         },
+        gifPath: {
+          type: 'string',
+        },
       },
     },
   },

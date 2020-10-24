@@ -21,7 +21,10 @@ let win = null;
 let overlayWin = null;
 let tray = null;
 
-const trackerManager = new TrackerManager();
+const gifSaveFolder = path.join(app.getPath('userData'), 'recordings');
+const trackerManager = new TrackerManager({
+  gifSaveFolder,
+});
 const rendererCommunication = new RendererCommunication({
   getTrackingActive: () => trackerManager.trackingActive,
   getPreviewActive: () => trackerManager.previewActive,

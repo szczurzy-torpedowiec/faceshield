@@ -1,13 +1,19 @@
 import { EventEmitter } from 'events';
+import path from 'path';
+import { GifFrame, GifUtil } from 'gifwrap';
+import jimp from 'jimp';
+import fs from 'fs';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
 import configStore from './stores/config';
 import trackingStore from './stores/tracking';
 
 export default class TrackerManager extends EventEmitter {
-  constructor() {
+  constructor(options) {
     super();
+    this.gifSaveFolder = options.gifSaveFolder;
     this.lastTouches = [];
+    this.imageFrames = [];
     this.lastTouchingStatus = false;
     this.trackingActive = false;
     this.previewActive = false;
@@ -59,7 +65,10 @@ export default class TrackerManager extends EventEmitter {
 
   initKinect() {
     this.kinect = new Kinect();
-    this.kinect.on('preview-update', (args) => this.emit('preview-update', args));
+    this.kinect.on('preview-update', (data) => {
+      this.saveFrame(data);
+      this.emit('preview-update', data);
+    });
     this.kinect.on('skeleton-update', (skeleton) => {
       this.detectTouchingKinect(skeleton);
       this.emit('skeleton-update', skeleton);
@@ -137,17 +146,12 @@ export default class TrackerManager extends EventEmitter {
       touching,
       timestamp: Date.now(),
     });
-    // if (this.lastTouches.length > waitFrames) this.lastTouches.shift();
     this.lastTouches = this.lastTouches.filter((touchObj) => touchObj.timestamp > Date.now() - 500);
     if (this.lastTouches.filter((touch) => touch.touching).length > this.lastTouches.length * 0.5
       && this.lastTouches.length > 1) {
       if (!this.lastTouchingStatus && this.trackingActive) {
-        const touches = trackingStore.get('touches');
-        touches.push({
-          timestamp: Date.now(),
-        });
-        trackingStore.set('touches', touches);
         this.emit('ding');
+        this.saveTouch();
       }
       this.lastTouchingStatus = true;
       this.emit('touching-update', true);
@@ -180,6 +184,7 @@ export default class TrackerManager extends EventEmitter {
     }
 
     this.updateActiveTime(data.facesBounds.length > 0);
+    this.saveFrame(data.image);
 
     const touchJoints = data.hands.flatMap((hand) => hand.landmarks);
     let touching = false;
@@ -191,5 +196,49 @@ export default class TrackerManager extends EventEmitter {
       });
     });
     this.handleTouching(touching, 5);
+  }
+
+  saveFrame(data) {
+    this.imageFrames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 10000);
+    this.imageFrames.push({
+      timestamp: Date.now(),
+      data,
+    });
+  }
+
+  async saveGif(timestamp) {
+    const frames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 5000);
+    if (frames.length === 0) return null;
+    const gifFrames = await Promise.all(frames.map(async (frame) => {
+      const buffer = Buffer.from(frame.data.split(',')[1], 'base64');
+      const j = await jimp.read(buffer);
+      j.resize(jimp.AUTO, 240);
+      return new GifFrame(j.bitmap);
+    }));
+
+    GifUtil.quantizeDekker(gifFrames, 32);
+    try {
+      await fs.promises.mkdir(this.gifSaveFolder);
+    } catch (error) {
+      if (error.code !== 'EEXIST') throw error;
+    }
+    const filePath = path.join(this.gifSaveFolder, `${timestamp}.gif`);
+    await GifUtil.write(filePath, gifFrames, { loops: 0 });
+    return filePath;
+  }
+
+  async saveTouch() {
+    const timestamp = new Date().getTime();
+    let filePath = null;
+    if (true) { // TODO: Nagrywanie włączone
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      filePath = await this.saveGif(timestamp);
+    }
+    const touches = trackingStore.get('touches');
+    touches.push({
+      timestamp,
+      gifPath: filePath.toString(),
+    });
+    trackingStore.set('touches', touches);
   }
 }

@@ -1,7 +1,6 @@
 import Store from 'electron-store';
 
 const schema = {
-  additionalProperties: false,
   autostart: {
     type: 'object',
     properties: {
