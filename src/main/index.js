@@ -175,7 +175,7 @@ function createTray() {
       role: 'quit',
     },
   ]);
-  tray.setToolTip(process.env.WEBPACK_DEV_SERVER_URL ? 'Face Shield development' : `Face Shield v${app.getVersion()}`);
+  tray.setToolTip(isDevelopment ? 'Face Shield development' : `Face Shield v${app.getVersion()}`);
   tray.setContextMenu(contextMenu);
   tray.addListener('click', () => {
     if (win === null) {

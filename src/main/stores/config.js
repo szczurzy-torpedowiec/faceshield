@@ -1,10 +1,14 @@
 import Store from 'electron-store';
 
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 const schema = {
   autostart: {
     type: 'object',
     properties: {
-      enabled: {
+      enabled: isDevelopment ? {
+        const: false,
+      } : {
         type: 'boolean',
       },
       startTracking: {
