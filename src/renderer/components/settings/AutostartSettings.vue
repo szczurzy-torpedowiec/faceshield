@@ -3,6 +3,14 @@
     <v-card-title>
       Autostart
     </v-card-title>
+    <v-alert
+      v-if="isDevelopment"
+      type="warning"
+      text
+      class="mb-0 mx-3"
+    >
+      Autostart cannot be enabled in development mode
+    </v-alert>
     <v-progress-circular
       v-if="autostartConfig === null"
       indeterminate
@@ -11,12 +19,16 @@
       color="primary"
     />
     <v-list v-else>
-      <v-list-item @click="toggleAutostartEnabled">
+      <v-list-item
+        :disabled="isDevelopment"
+        @click="toggleAutostartEnabled"
+      >
         <v-list-item-title>
           Launch app on system startup
         </v-list-item-title>
         <v-list-item-action>
           <v-switch
+            :disabled="isDevelopment"
             :input-value="autostartConfig.enabled"
             readonly
           />
@@ -58,6 +70,9 @@
 
 <script>
   export default {
+    data: () => ({
+      isDevelopment: process.env.NODE_ENV !== 'production',
+    }),
     computed: {
       autostartConfig() {
         return this.$store.state.autostartConfig;
@@ -65,6 +80,7 @@
     },
     methods: {
       toggleAutostartEnabled() {
+        if (this.isDevelopment) return;
         this.$comm.setAutostartConfig({
           ...this.autostartConfig,
           enabled: !this.autostartConfig.enabled,

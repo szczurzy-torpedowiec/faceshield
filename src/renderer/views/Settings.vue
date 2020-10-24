@@ -4,6 +4,15 @@
     <device-settings class="mt-4" />
     <autostart-settings class="mt-4" />
     <alert-settings class="mt-4" />
+    <v-btn
+      color="primary"
+      text
+      block
+      class="mt-4 mb-8"
+      @click="openUserData"
+    >
+      Open user data folder
+    </v-btn>
   </div>
 </template>
 
@@ -23,6 +32,11 @@
     beforeRouteLeave(to, from, next) {
       this.$comm.stopPreview();
       next();
+    },
+    methods: {
+      openUserData() {
+        this.$comm.openUserData();
+      },
     },
   };
 </script>

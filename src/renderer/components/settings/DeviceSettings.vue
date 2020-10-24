@@ -52,7 +52,6 @@
             <v-alert
               type="info"
               text
-              outlined
               class="mb-4"
             >
               Face Shield only works with Kinect v1 drivers.

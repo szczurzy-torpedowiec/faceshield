@@ -59,10 +59,11 @@ const defaults = {
   lastActiveTime: null,
 };
 
-const trackingStore = new Store({
-  schema,
-  defaults,
-  name: 'tracking',
-});
-
-export default trackingStore;
+export default function createTrackingStore(path) {
+  return new Store({
+    schema,
+    defaults,
+    name: 'tracking',
+    cwd: path,
+  });
+}
