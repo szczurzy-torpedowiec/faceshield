@@ -1,6 +1,8 @@
 import { EventEmitter } from 'events';
-import { fork } from 'child_process';
 import path from 'path';
+import { GifFrame, GifUtil } from 'gifwrap';
+import jimp from 'jimp';
+import fs from 'fs';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
 
@@ -153,33 +155,38 @@ export default class TrackerManager extends EventEmitter {
     });
   }
 
-  saveTouch() {
-    // TODO: Nagrywanie włączone
-    if (true) {
-      setTimeout(async () => {
-        const frames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 5000);
-        const encoderProcess = fork('./gifEncoder.js');
-        const gifSavePath = path.join(this.gifSaveFolder, `${Date.now()}.gif`);
-        encoderProcess.send({
-          frames,
-          path: gifSavePath,
-        });
-        encoderProcess.on('message', (m) => {
-          const touches = this.store.get('touches');
-          touches.push({
-            timestamp: Date.now(),
-            gifPath: m.filePath,
-          });
-          this.store.set('touches', touches);
-        });
-      }, 1500);
-    } else {
-      const touches = this.store.get('touches');
-      touches.push({
-        timestamp: Date.now(),
-        gifPath: null,
-      });
-      this.store.set('touches', touches);
+  async saveGif(timestamp) {
+    const frames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 5000);
+    const gifFrames = await Promise.all(frames.map(async (frame) => {
+      const buffer = Buffer.from(frame.data.split(',')[1], 'base64');
+      const j = await jimp.read(buffer);
+      j.resize(jimp.AUTO, 240);
+      return new GifFrame(j.bitmap);
+    }));
+
+    GifUtil.quantizeDekker(gifFrames, 32);
+    try {
+      await fs.promises.mkdir(this.gifSaveFolder);
+    } catch (error) {
+      if (error.code !== 'EEXIST') throw error;
     }
+    const filePath = path.join(this.gifSaveFolder, `${timestamp}.gif`);
+    await GifUtil.write(filePath, gifFrames, { loops: 0 });
+    return filePath;
+  }
+
+  async saveTouch() {
+    const timestamp = new Date().getTime();
+    let filePath = null;
+    if (true) { // TODO: Nagrywanie włączone
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      filePath = await this.saveGif(timestamp);
+    }
+    const touches = this.store.get('touches');
+    touches.push({
+      timestamp,
+      gifPath: filePath,
+    });
+    this.store.set('touches', touches);
   }
 }

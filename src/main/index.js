@@ -7,7 +7,6 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import path from 'path';
 import parseArgs from 'minimist';
-import fs from 'fs';
 import store from './store';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
@@ -23,9 +22,6 @@ let overlayWin = null;
 let tray = null;
 
 const gifSaveFolder = path.join(app.getPath('userData'), 'recordings');
-if (!fs.existsSync(gifSaveFolder)) {
-  fs.mkdirSync(gifSaveFolder);
-}
 const trackerManager = new TrackerManager({
   store,
   gifSaveFolder,
