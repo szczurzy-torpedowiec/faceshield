@@ -81,6 +81,10 @@ class CommunicationPlugin {
     window.ipcRenderer.send('set-alert-volume', volume);
   }
 
+  openUserData() {
+    window.ipcRenderer.send('open-user-data');
+  }
+
   async install(Vue, options) {
     this.store = options.store;
     window.ipcRenderer.on('autostart-config-changed', (event, config) => {
@@ -133,6 +137,7 @@ class CommunicationPlugin {
       setTracker: this.setTracker,
       setOverlayAlertsEnabled: this.setOverlayAlertsEnabled,
       setAlertVolume: this.setAlertVolume,
+      openUserData: this.openUserData,
     };
   }
 }

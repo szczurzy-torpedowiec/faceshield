@@ -82,6 +82,8 @@ export default class RendererCommunication extends EventEmitter {
       this.configStore.set('alertVolume', volume);
       event.sender.send('alert-volume-changed', volume);
     });
+
+    ipcMain.on('open-user-data', () => this.emit('open-user-data'));
   }
 
   updatePreview(win, image) {

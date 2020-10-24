@@ -88,6 +88,9 @@ rendererCommunication.on('overlay-alerts-enabled-changed', (enabled) => {
     overlayCommunication.setTouching(overlayWin, false);
   }
 });
+rendererCommunication.on('open-user-data', () => {
+  shell.openPath(app.getPath('userData'));
+});
 
 trackerManager.on('preview-update', (args) => {
   if (win !== null) rendererCommunication.updatePreview(win, args);
