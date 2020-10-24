@@ -241,14 +241,14 @@
             Hands not detected
           </preview-alert>
           <preview-alert
-            :value="previewActive"
+            :value="previewActive && !touching"
             color="blue"
             icon="mdi-emoticon"
           >
             Hands aren't touching face
           </preview-alert>
           <preview-alert
-            :value="previewActive"
+            :value="previewActive && touching"
             color="deep-orange"
             icon="mdi-emoticon-sad"
           >
@@ -273,6 +273,7 @@
       kinectImage: null,
       webcamData: null,
       skeleton: null,
+      touching: false,
     }),
     computed: {
       trackingActive() {
@@ -327,14 +328,14 @@
       handsNotDetected() {
         if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.hands.length === 0;
         if (this.tracker === 'kinect' && this.skeleton !== null) {
-          return !this.skeleton.handLeft && !this.skeleton.handRight;
+          return this.skeleton.hands.length === 0;
         }
         return null;
       },
       faceNotDetected() {
         if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.facesBounds.length === 0;
         if (this.tracker === 'kinect' && this.skeleton !== null) {
-          return !this.skeleton.headTopLeft || !this.skeleton.headBottomRight;
+          return !this.skeleton.head;
         }
         return null;
       },
@@ -359,6 +360,7 @@
         this.webcamData = data;
         this.drawWebcamSkeleton();
       });
+      window.ipcRenderer.on('set-touching-preview', (event, touching) => { this.touching = touching; });
     },
     methods: {
       toggleUseCpuBackend() {
@@ -378,12 +380,8 @@
 
         const ctx = this.$refs.previewSkeleton.getContext('2d');
         ctx.clearRect(0, 0, 320, this.height);
-        const hands = [
-          this.skeleton.handLeft,
-          this.skeleton.handRight,
-        ].filter((hand) => !!hand);
         ctx.fillStyle = '#0c0';
-        hands.forEach((hand) => {
+        this.skeleton.hands.forEach((hand) => {
           ctx.beginPath();
           ctx.arc(
             hand.x * this.scale,
@@ -396,14 +394,14 @@
           ctx.closePath();
           ctx.fill();
         });
-        if (this.skeleton.headTopLeft && this.skeleton.headBottomRight) {
+        if (this.skeleton.head) {
           ctx.strokeStyle = '#049';
           ctx.lineWidth = 3;
           ctx.strokeRect(
-            this.skeleton.headTopLeft.x * this.scale,
-            this.skeleton.headTopLeft.y * this.scale,
-            (this.skeleton.headTopLeft.y - this.skeleton.headBottomRight.y) * this.scale,
-            (this.skeleton.headBottomRight.y - this.skeleton.headTopLeft.y) * this.scale,
+            this.skeleton.head.x * this.scale,
+            this.skeleton.head.y * this.scale,
+            this.skeleton.head.dx * this.scale,
+            this.skeleton.head.dy * this.scale,
           );
         }
       },

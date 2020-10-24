@@ -15,17 +15,11 @@ namespace FaceShieldKinectModule
         [DataContract]
         class JSONSkeleton
         {
-            [DataMember(Name = "headTopLeft")]
-            public JSONJoint headTopLeft { get; set; }
+            [DataMember(Name = "head")]
+            public JSONArea head { get; set; }
 
-            [DataMember(Name = "headBottomRight")]
-            public JSONJoint headBottomRight { get; set; }
-
-            [DataMember(Name = "handLeft")]
-            public JSONJoint handLeft { get; set; }
-
-            [DataMember(Name = "handRight")]
-            public JSONJoint handRight { get; set; }
+            [DataMember(Name = "hands")]
+            public List<JSONJoint> hands { get; set; }
         }
 
         [DataContract]
@@ -41,15 +35,34 @@ namespace FaceShieldKinectModule
             public double Z { get; set; }
         }
 
+        [DataContract]
+        class JSONArea
+        {
+            [DataMember(Name = "x")]
+            public double X { get; set; }
+
+            [DataMember(Name = "dx")]
+            public double DX { get; set; }
+
+            [DataMember(Name = "y")]
+            public double Y { get; set; }
+
+            [DataMember(Name = "dy")]
+            public double DY { get; set; }
+
+            [DataMember(Name = "z")]
+            public double Z { get; set; }
+        }
+
         public static string Serialize(this List<Skeleton> skeletons, CoordinateMapper mapper)
         {
             JSONSkeleton jsonSkeleton = new JSONSkeleton
             {
-                handLeft = new JSONJoint(),
-                handRight = new JSONJoint(),
-                headTopLeft = new JSONJoint(),
-                headBottomRight = new JSONJoint()
+                head = new JSONArea(),
+                hands = new List<JSONJoint>()
             };
+            JSONJoint headTop = new JSONJoint();
+            JSONJoint headBottom = new JSONJoint();
             var skeleton = skeletons.First();
             List<JSONJoint> Joints = new List<JSONJoint>();
             foreach (Joint joint in skeleton.Joints)
@@ -68,21 +81,25 @@ namespace FaceShieldKinectModule
                 };
                 switch (joint.JointType.ToString().ToLower()) {
                     case "handleft":
-                        jsonSkeleton.handLeft = jointToAdd;
+                        jsonSkeleton.hands.Add(jointToAdd);
                         break;
                     case "handright":
-                        jsonSkeleton.handRight = jointToAdd;
+                        jsonSkeleton.hands.Add(jointToAdd);
                         break;
                     case "head":
-                        jsonSkeleton.headTopLeft = jointToAdd;
+                        headTop = jointToAdd;
                         break;
                     case "shouldercenter":
-                        jsonSkeleton.headBottomRight = jointToAdd;
+                        headBottom = jointToAdd;
                         break;
                 }
                 }
-            jsonSkeleton.headTopLeft.X = jsonSkeleton.headTopLeft.X - ((jsonSkeleton.headTopLeft.Y -jsonSkeleton.headBottomRight.Y) / 2);
-            jsonSkeleton.headBottomRight.X = jsonSkeleton.headBottomRight.X + ((jsonSkeleton.headTopLeft.Y - jsonSkeleton.headBottomRight.Y) / 2);
+            double headSize = headBottom.Y - headTop.Y;
+            jsonSkeleton.head.X = headBottom.X - (headSize / 2);
+            jsonSkeleton.head.Y = headBottom.Y;
+            jsonSkeleton.head.DX = headSize;
+            jsonSkeleton.head.DY = -headSize;
+            jsonSkeleton.head.Z = (headTop.Z + headBottom.Z) / 2;
             return objToJson(jsonSkeleton);
         }
 

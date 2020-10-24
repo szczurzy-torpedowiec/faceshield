@@ -30,6 +30,9 @@ class CommunicationPlugin {
     const webcamExecuteError = await window.ipcRenderer.invoke('get-webcam-execute-error');
     this.store.commit('setWebcamExecuteError', webcamExecuteError);
 
+    const overlayAlertsEnabled = await window.ipcRenderer.invoke('get-overlay-alerts-enabled');
+    this.store.commit('setOverlayAlertsEnabled', overlayAlertsEnabled);
+
     const alertVolume = await window.ipcRenderer.invoke('get-alert-volume');
     this.store.commit('setAlertVolume', alertVolume);
   }
@@ -70,8 +73,12 @@ class CommunicationPlugin {
     window.ipcRenderer.send('set-tracker', tracker);
   }
 
-  setAlertVolume(tracker) {
-    window.ipcRenderer.send('set-alert-volume', tracker);
+  setOverlayAlertsEnabled(enabled) {
+    window.ipcRenderer.send('set-overlay-alerts-enabled', enabled);
+  }
+
+  setAlertVolume(volume) {
+    window.ipcRenderer.send('set-alert-volume', volume);
   }
 
   async install(Vue, options) {
@@ -106,6 +113,9 @@ class CommunicationPlugin {
     window.ipcRenderer.on('webcam-execute-error-changed', (event, error) => {
       this.store.commit('setWebcamExecuteError', error);
     });
+    window.ipcRenderer.on('overlay-alerts-enabled-changed', (event, enabled) => {
+      this.store.commit('setOverlayAlertsEnabled', enabled);
+    });
     window.ipcRenderer.on('alert-volume-changed', (event, volume) => {
       this.store.commit('setAlertVolume', volume);
     });
@@ -121,6 +131,7 @@ class CommunicationPlugin {
       setUseCpuBackend: this.setUseCpuBackend,
       setWebcamFrameWait: this.setWebcamFrameWait,
       setTracker: this.setTracker,
+      setOverlayAlertsEnabled: this.setOverlayAlertsEnabled,
       setAlertVolume: this.setAlertVolume,
     };
   }

@@ -35,6 +35,9 @@ const schema = {
   webcamFrameWait: {
     type: 'number',
   },
+  overlayAlertsEnabled: {
+    type: 'boolean',
+  },
   alertVolume: {
     type: 'number',
   },
@@ -50,12 +53,14 @@ const defaults = {
   tracker: 'webcam',
   useCpuBackend: false,
   webcamFrameWait: 0,
+  overlayAlertsEnabled: true,
   alertVolume: 1,
 };
 
-const store = new Store({
+const configStore = new Store({
   schema,
   defaults,
+  name: 'config',
 });
 
-export default store;
+export default configStore;

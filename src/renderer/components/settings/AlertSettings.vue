@@ -4,13 +4,17 @@
       Alerts
     </v-card-title>
     <v-list>
-      <v-list-item link>
+      <v-list-item
+        :disabled="overlayAlertsEnabled === null"
+        @click="toggleOverlayAlertsEnabled"
+      >
         <v-list-item-title>
-          Show alerts overlay
+          Enable overlay alerts
         </v-list-item-title>
         <v-list-item-action>
           <v-switch
-            :input-value="false"
+            :input-value="overlayAlertsEnabled"
+            :disabled="overlayAlertsEnabled === null"
             readonly
           />
         </v-list-item-action>
@@ -89,6 +93,9 @@
       playAlertDebounced: null,
     }),
     computed: {
+      overlayAlertsEnabled() {
+        return this.$store.state.overlayAlertsEnabled;
+      },
       alertVolume() {
         return this.$store.state.alertVolume;
       },
@@ -97,6 +104,9 @@
       this.playAlertDebounced = _.debounce(this.playAlert, 350);
     },
     methods: {
+      toggleOverlayAlertsEnabled() {
+        this.$comm.setOverlayAlertsEnabled(!this.overlayAlertsEnabled);
+      },
       setAlertVolume(value) {
         this.$comm.setAlertVolume(value);
         this.playAlertDebounced();

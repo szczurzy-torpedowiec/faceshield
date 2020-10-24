@@ -7,7 +7,7 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import path from 'path';
 import parseArgs from 'minimist';
-import store from './store';
+import configStore from './stores/config';
 import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
 import TrackerManager from './tracker-manager';
@@ -21,17 +21,18 @@ let win = null;
 let overlayWin = null;
 let tray = null;
 
+const gifSaveFolder = path.join(app.getPath('userData'), 'recordings');
 const trackerManager = new TrackerManager({
-  store,
+  gifSaveFolder,
 });
 const rendererCommunication = new RendererCommunication({
-  store,
   getTrackingActive: () => trackerManager.trackingActive,
   getPreviewActive: () => trackerManager.previewActive,
   getWebcamModelsError: () => trackerManager.webcam.modelsError,
   getWebcamCameraError: () => trackerManager.webcam.cameraError,
   getWebcamExecuteError: () => trackerManager.webcam.executeError,
 });
+const overlayCommunication = new OverlayCommunication();
 
 rendererCommunication.on('autostart-config-changed', (config) => {
   app.setLoginItemSettings({
@@ -47,6 +48,7 @@ rendererCommunication.on('start-tracking', async () => {
 });
 rendererCommunication.on('pause-tracking', async () => {
   trackerManager.stopTracking();
+  overlayCommunication.setTouching(overlayWin, false);
 });
 rendererCommunication.on('start-preview', async () => {
   await trackerManager.startPreview();
@@ -66,9 +68,12 @@ rendererCommunication.on('webcam-frame-wait-changed', (wait) => {
 rendererCommunication.on('tracker-changed', async (tracker) => {
   await trackerManager.setTracker(tracker);
 });
-
-const overlayCommunication = new OverlayCommunication({
-  store,
+rendererCommunication.on('overlay-alerts-enabled-changed', (enabled) => {
+  if (enabled) {
+    overlayCommunication.setTouching(overlayWin, trackerManager.lastTouchingStatus);
+  } else {
+    overlayCommunication.setTouching(overlayWin, false);
+  }
 });
 
 trackerManager.on('preview-update', (args) => {
@@ -79,6 +84,15 @@ trackerManager.on('skeleton-update', (args) => {
 });
 trackerManager.on('webcam-data-update', (data) => {
   if (win !== null) rendererCommunication.updateWebcamData(win, data);
+});
+trackerManager.on('touching-update', (touching) => {
+  if (trackerManager.trackingActive) {
+    if (overlayWin !== null) overlayCommunication.setTouching(overlayWin, touching);
+  }
+  if (win !== null) rendererCommunication.setTouchingPreview(win, touching);
+});
+trackerManager.on('ding', () => {
+  if (overlayWin !== null) overlayCommunication.ding(overlayWin);
 });
 trackerManager.webcam.on('models-error', (error) => {
   if (win !== null) rendererCommunication.setWebcamModelsError(win, error);
@@ -97,6 +111,8 @@ app.commandLine.appendSwitch('persist-user-preferences');
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
+
+console.log(app.getPath('userData'));
 
 function createWindow() {
   // Create the browser window.
@@ -206,12 +222,12 @@ if (instanceLock) {
         '--autostart',
       ],
     });
-    if (process.platform === 'darwin') store.set('autostart.minimise', loginItemSettings.openAsHidden);
+    if (process.platform === 'darwin') configStore.set('autostart.minimise', loginItemSettings.openAsHidden);
     if (argv.autostart) {
-      if (store.get('autostart.startTracking')) {
+      if (configStore.get('autostart.startTracking')) {
         await trackerManager.startTracking();
       }
-      if (!store.get('autostart.minimise')) createWindow();
+      if (!configStore.get('autostart.minimise')) createWindow();
     } else {
       createWindow();
     }

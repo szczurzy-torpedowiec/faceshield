@@ -1,19 +1,19 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import { EventEmitter } from 'events';
+import configStore from '../stores/config';
 
 class Webcam extends EventEmitter {
-  constructor(options) {
+  constructor() {
     super();
-    this.store = options.store;
     this.window = null;
     this.modelsError = null;
     this.cameraError = null;
     this.executeError = null;
 
-    ipcMain.handle('webcam:get-video-input-label', () => this.store.get('videoInputLabel'));
-    ipcMain.handle('webcam:get-use-cpu-backend', () => this.store.get('useCpuBackend'));
-    ipcMain.handle('webcam:get-frame-wait', () => this.store.get('webcamFrameWait'));
+    ipcMain.handle('webcam:get-video-input-label', () => configStore.get('videoInputLabel'));
+    ipcMain.handle('webcam:get-use-cpu-backend', () => configStore.get('useCpuBackend'));
+    ipcMain.handle('webcam:get-frame-wait', () => configStore.get('webcamFrameWait'));
 
     ipcMain.on('webcam:data', (event, data) => this.emit('data-update', data));
     ipcMain.on('webcam:models-error', (event, error) => this.setModelsError(error));
