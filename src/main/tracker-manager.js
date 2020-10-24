@@ -10,9 +10,50 @@ export default class TrackerManager extends EventEmitter {
     this.trackingActive = false;
     this.previewActive = false;
     this.store = options.store;
+    this.faceDetectStreak = 0;
+
+    this.checkLastActiveTime();
+    setInterval(() => this.checkLastActiveTime(), 1000);
+
     this.tracker = this.store.get('tracker');
     this.initKinect();
     this.initWebcam();
+  }
+
+  checkLastActiveTime() {
+    const lastActiveTime = this.store.get('lastActiveTime');
+    if (lastActiveTime === null) return;
+    const timeSinceEnd = new Date().getTime() - lastActiveTime.endTimestamp;
+    if (timeSinceEnd < 10000) return;
+    this.store.set('lastActiveTime', null);
+
+    const duration = lastActiveTime.endTimestamp - lastActiveTime.startTimestamp;
+    if (duration >= 10000) {
+      const activeTimes = this.store.get('activeTimes');
+      activeTimes.push({
+        ...lastActiveTime,
+        duration,
+      });
+      this.store.set('activeTimes', activeTimes);
+    }
+  }
+
+  updateActiveTime(detected) {
+    if (!detected || !this.trackingActive) {
+      this.faceDetectStreak = 0;
+      return;
+    }
+    this.faceDetectStreak += 1;
+    if (this.faceDetectStreak < 3) return;
+
+    const lastActiveTime = this.store.get('lastActiveTime');
+    const endTimestamp = new Date().getTime();
+    if (lastActiveTime === null) {
+      this.store.set('lastActiveTime', {
+        startTimestamp: endTimestamp,
+        endTimestamp,
+      });
+    } else this.store.set('lastActiveTime.endTimestamp', endTimestamp);
   }
 
   initKinect() {
@@ -63,6 +104,7 @@ export default class TrackerManager extends EventEmitter {
     if (this.previewActive) return;
     this.stop();
     this.emit('touching-update', false);
+    this.updateActiveTime(false);
   }
 
   async startPreview() {
@@ -118,19 +160,29 @@ export default class TrackerManager extends EventEmitter {
 
   detectTouchingKinect(skeleton) {
     let touching = false;
-    skeleton.hands.forEach((hand) => {
-      if (
-        (hand.x >= skeleton.head.x && hand.x <= (skeleton.head.x + skeleton.head.dx))
+    if (skeleton.head) {
+      this.updateActiveTime(true);
+      skeleton.hands.forEach((hand) => {
+        if (
+          (hand.x >= skeleton.head.x && hand.x <= (skeleton.head.x + skeleton.head.dx))
         && (hand.y <= skeleton.head.y && hand.y >= (skeleton.head.y + skeleton.head.dy))
-      ) touching = true;
-    });
+        ) touching = true;
+      });
+    } else {
+      this.updateActiveTime(false);
+    }
     this.handleTouching(touching, 50);
   }
 
   detectTouchingWebcam(data) {
-    if (!data) return;
-    const touchJoints = data.hands.flatMap((hand) => hand.landmarks);
+    if (!data) {
+      this.updateActiveTime(false);
+      return;
+    }
 
+    this.updateActiveTime(data.facesBounds.length > 0);
+
+    const touchJoints = data.hands.flatMap((hand) => hand.landmarks);
     let touching = false;
     data.facesBounds.forEach(({
       top, bottom, left, right,

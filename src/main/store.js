@@ -52,6 +52,42 @@ const schema = {
       },
     },
   },
+  activeTimes: {
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        startTimestamp: {
+          type: 'number',
+        },
+        endTimestamp: {
+          type: 'number',
+        },
+        duration: {
+          type: 'number',
+          description: 'Duration in milliseconds',
+        },
+      },
+    },
+  },
+  lastActiveTime: {
+    anyOf: [
+      {
+        type: 'null',
+      },
+      {
+        type: 'object',
+        properties: {
+          startTimestamp: {
+            type: 'number',
+          },
+          endTimestamp: {
+            type: 'number',
+          },
+        },
+      },
+    ],
+  },
 };
 
 const defaults = {
@@ -67,6 +103,8 @@ const defaults = {
   overlayAlertsEnabled: true,
   alertVolume: 1,
   touches: [],
+  activeTimes: [],
+  lastActiveTime: null,
 };
 
 const store = new Store({
