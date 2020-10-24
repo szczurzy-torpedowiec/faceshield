@@ -91,10 +91,15 @@ export default class TrackerManager extends EventEmitter {
     await this.start();
   }
 
-  handleTouching(touching, waitFrames) {
-    this.lastTouches.push(touching);
-    if (this.lastTouches.length > waitFrames) this.lastTouches.shift();
-    if (this.lastTouches.filter((touch) => touch).length > waitFrames * 0.5) {
+  handleTouching(touching) {
+    this.lastTouches.push({
+      touching,
+      timestamp: Date.now(),
+    });
+    // if (this.lastTouches.length > waitFrames) this.lastTouches.shift();
+    this.lastTouches = this.lastTouches.filter((touchObj) => touchObj.timestamp > Date.now() - 500);
+    if (this.lastTouches.filter((touch) => touch.touching).length > this.lastTouches.length * 0.5
+      && this.lastTouches.length > 1) {
       if (!this.lastTouchingStatus && this.trackingActive) {
         const touches = this.store.get('touches');
         touches.push({
