@@ -64,7 +64,7 @@
                   </v-icon>
                 </v-btn>
               </template>
-              <v-card color="grey darken-3">
+              <v-card :color="$vuetify.theme.isDark ? 'grey darken-3' : 'white'">
                 <v-card-title>Delete event?</v-card-title>
                 <v-card-subtitle>
                   You cannot undo this
