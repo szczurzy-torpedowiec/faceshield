@@ -17,6 +17,9 @@ class CommunicationPlugin {
 
     const webcamExecuteError = await window.ipcRenderer.invoke('get-webcam-execute-error');
     this.store.commit('setWebcamExecuteError', webcamExecuteError);
+
+    const trackingState = await window.ipcRenderer.invoke('get-tracking-state');
+    this.store.commit('setTrackingState', trackingState);
   }
 
   setConfigItem(path, value) {
@@ -62,6 +65,9 @@ class CommunicationPlugin {
     });
     window.ipcRenderer.on('webcam-execute-error-changed', (event, error) => {
       this.store.commit('setWebcamExecuteError', error);
+    });
+    window.ipcRenderer.on('tracking-state-changed', (event, trackingState) => {
+      this.store.commit('setTrackingState', trackingState);
     });
 
     await this.init();

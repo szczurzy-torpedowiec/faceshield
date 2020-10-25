@@ -42,6 +42,7 @@ const rendererCommunication = new RendererCommunication({
   getWebcamModelsError: () => trackerManager.webcam.modelsError,
   getWebcamCameraError: () => trackerManager.webcam.cameraError,
   getWebcamExecuteError: () => trackerManager.webcam.executeError,
+  getTrackingState: () => trackerManager.state,
 });
 const overlayCommunication = new OverlayCommunication({
   configStore,
@@ -105,6 +106,9 @@ trackerManager.webcam.on('camera-error', (error) => {
 });
 trackerManager.webcam.on('execute-error', (error) => {
   if (win !== null) rendererCommunication.setWebcamExecuteError(win, error);
+});
+trackerManager.on('state-update', (state) => {
+  if (win !== null) rendererCommunication.setTrackingState(win, state);
 });
 
 // Used to prevent webcam device id change

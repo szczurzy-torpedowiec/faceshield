@@ -7,6 +7,7 @@ class Webcam extends EventEmitter {
     super();
     this.configStore = options.configStore;
     this.window = null;
+    this.anyError = null;
     this.modelsError = null;
     this.cameraError = null;
     this.executeError = null;
@@ -64,18 +65,28 @@ class Webcam extends EventEmitter {
   }
 
   setModelsError(error) {
+    if (this.modelsError !== error) this.emit('models-error', error);
     this.modelsError = error;
-    this.emit('models-error', error);
+    this.updateAnyError();
   }
 
   setCameraError(error) {
+    if (this.cameraError !== error) this.emit('camera-error', error);
     this.cameraError = error;
-    this.emit('camera-error', error);
+    this.updateAnyError();
   }
 
   setExecuteError(error) {
+    if (this.executeError !== error) this.emit('execute-error', error);
     this.executeError = error;
-    this.emit('execute-error', error);
+    this.updateAnyError();
+  }
+
+  updateAnyError() {
+    if (this.executeError === null && this.modelsError === null && this.cameraError === null) {
+      this.anyError = null;
+    } else this.anyError = this.executeError || this.modelsError || this.cameraError;
+    this.emit('any-error', this.anyError);
   }
 }
 
