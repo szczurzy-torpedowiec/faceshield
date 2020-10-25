@@ -61,7 +61,6 @@ rendererCommunication.on('start-tracking', async () => {
 });
 rendererCommunication.on('pause-tracking', async () => {
   trackerManager.stopTracking();
-  overlayCommunication.setTouching(overlayWin, false);
 });
 rendererCommunication.on('start-preview', async () => {
   await trackerManager.startPreview();
@@ -71,7 +70,7 @@ rendererCommunication.on('stop-preview', async () => {
 });
 configStore.onDidChange('overlayAlertsEnabled', (enabled) => {
   if (enabled) {
-    overlayCommunication.setTouching(overlayWin, trackerManager.lastTouchingStatus);
+    overlayCommunication.setTouching(overlayWin, trackerManager.touchEvent !== null);
   } else {
     overlayCommunication.setTouching(overlayWin, false);
   }
@@ -90,10 +89,10 @@ trackerManager.on('webcam-data-update', (data) => {
   if (win !== null) rendererCommunication.updateWebcamData(win, data);
 });
 trackerManager.on('touching-update', (touching) => {
-  if (trackerManager.trackingActive) {
-    if (overlayWin !== null) overlayCommunication.setTouching(overlayWin, touching);
-  }
   if (win !== null) rendererCommunication.setTouchingPreview(win, touching);
+});
+trackerManager.on('touch-event-update', (touchEvent) => {
+  if (overlayWin !== null) overlayCommunication.setTouching(overlayWin, touchEvent);
 });
 trackerManager.on('ding', () => {
   if (overlayWin !== null) overlayCommunication.ding(overlayWin);
