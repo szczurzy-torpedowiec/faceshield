@@ -13,6 +13,8 @@ import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
 import TrackerManager from './tracker-manager';
 
+const fs = require('fs').promises;
+
 const argv = parseArgs(process.argv.slice(1));
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -81,6 +83,17 @@ rendererCommunication.on('open-user-data', () => {
   shell.openPath(app.getPath('userData'));
 });
 
+rendererCommunication.on('remove-touch', async (timestamp) => {
+  const touches = trackingStore.get('touches');
+  const index = touches.findIndex((touch) => touch.timestamp === timestamp);
+  if (touches[index].gifPath) {
+    await fs.unlink(touches[index].gifPath);
+  }
+  touches.splice(index, 1);
+  trackingStore.set('touches', touches);
+  if (win !== null) rendererCommunication.setTouches(win, touches);
+});
+
 trackingStore.onDidChange('touches', (touches) => {
   if (win !== null) rendererCommunication.setTouches(win, touches);
 });
@@ -141,6 +154,7 @@ function createWindow() {
       // for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
       preload: path.join(__dirname, 'rendererPreload.js'),
+      webSecurity: false,
     },
   });
 
@@ -159,6 +173,13 @@ function createWindow() {
     trackerManager.stopPreview();
   });
 }
+
+app.whenReady().then(() => {
+  protocol.registerFileProtocol('file', (request, callback) => {
+    const pathname = decodeURI(request.url.replace('file:///', ''));
+    callback(pathname);
+  });
+});
 
 function createTray() {
   tray = new Tray(nativeImage.createFromPath(path.join(__static, 'icon-32.png'))); // TODO: add proper icon

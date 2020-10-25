@@ -52,6 +52,10 @@ class CommunicationPlugin {
     window.ipcRenderer.send('open-user-data');
   }
 
+  removeTouch(timestamp) {
+    window.ipcRenderer.send('remove-touch', timestamp);
+  }
+
   async install(Vue, options) {
     this.store = options.store;
     window.ipcRenderer.on('config-item-changed', (event, path, value) => {
@@ -90,6 +94,7 @@ class CommunicationPlugin {
       startPreview: this.startPreview,
       stopPreview: this.stopPreview,
       openUserData: this.openUserData,
+      removeTouch: this.removeTouch,
     };
   }
 }
