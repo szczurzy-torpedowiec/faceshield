@@ -87,6 +87,9 @@ trackingStore.onDidChange('touches', (touches) => {
 trackingStore.onDidChange('activeTimes', (activeTimes) => {
   if (win !== null) rendererCommunication.setActiveTimes(win, activeTimes);
 });
+trackingStore.onDidChange('lastActiveTime.startTimestamp', (startTimestamp) => {
+  if (win !== null) rendererCommunication.setLastActiveStart(win, startTimestamp || null);
+});
 
 trackerManager.on('preview-update', (args) => {
   if (win !== null) rendererCommunication.updatePreview(win, args);

@@ -48,6 +48,8 @@ export default class RendererCommunication extends EventEmitter {
     ipcMain.handle('get-touches', () => this.trackingStore.get('touches'));
     ipcMain.handle('get-active-times', () => this.trackingStore.get('activeTimes'));
 
+    ipcMain.handle('get-last-active-start', () => this.trackingStore.get('lastActiveTime.startTimestamp') || null);
+
     ipcMain.on('open-user-data', () => this.emit('open-user-data'));
   }
 
@@ -89,5 +91,9 @@ export default class RendererCommunication extends EventEmitter {
 
   setActiveTimes(win, activeTimes) {
     win.webContents.send('active-times-changed', activeTimes);
+  }
+
+  setLastActiveStart(win, startTimestamp) {
+    win.webContents.emit('last-active-start-changed', startTimestamp);
   }
 }
