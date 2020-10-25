@@ -60,7 +60,7 @@
           </template>
         </v-slider>
       </v-list-item>
-      <v-list-item link>
+      <v-list-item @click="toggleShortcut">
         <v-list-item-content>
           <v-list-item-title>
             Enable false alert shortcut
@@ -71,7 +71,7 @@
         </v-list-item-content>
         <v-list-item-action>
           <v-switch
-            :input-value="false"
+            :input-value="shortcutEnabled"
             readonly
           />
         </v-list-item-action>
@@ -115,6 +115,9 @@
       saveGifs() {
         return this.$store.state.config.saveGifs;
       },
+      shortcutEnabled() {
+        return this.$store.state.config.shortcutEnabled;
+      },
     },
     created() {
       this.playAlertDebounced = _.debounce(this.playAlert, 350);
@@ -141,6 +144,9 @@
       },
       toggleSaveGifs() {
         this.$comm.setConfigItem('saveGifs', !this.saveGifs);
+      },
+      toggleShortcut() {
+        this.$comm.setConfigItem('shortcutEnabled', !this.shortcutEnabled);
       },
     },
   };

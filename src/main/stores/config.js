@@ -57,6 +57,9 @@ const schema = {
   touchesPerHourTilePeriod: {
     type: 'number',
   },
+  shortcutEnabled: {
+    type: 'boolean',
+  },
 };
 
 const defaults = {
@@ -75,6 +78,7 @@ const defaults = {
   darkTheme: false,
   recentTouchesTilePeriod: 1,
   touchesPerHourTilePeriod: 24,
+  shortcutEnabled: true,
 };
 
 export default function createConfigStore(path) {
