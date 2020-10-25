@@ -15,6 +15,7 @@ export default new Vuex.Store({
     trackingState: null,
     touches: null,
     activeTimes: null,
+    lastActiveStart: null,
   },
   mutations: {
     setConfig(state, config) {
@@ -46,6 +47,9 @@ export default new Vuex.Store({
     },
     setActiveTimes(state, activeTimes) {
       state.activeTimes = activeTimes;
+    },
+    setLastActiveStart(state, lastActiveStart) {
+      state.lastActiveStart = lastActiveStart;
     },
   },
   actions: {

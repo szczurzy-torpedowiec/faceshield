@@ -26,6 +26,9 @@ class CommunicationPlugin {
 
     const activeTimes = await window.ipcRenderer.invoke('get-active-times');
     this.store.commit('setActiveTimes', activeTimes);
+
+    const lastActiveStart = await window.ipcRenderer.invoke('get-last-active-start');
+    this.store.commit('setLastActiveStart', lastActiveStart);
   }
 
   setConfigItem(path, value) {
@@ -84,6 +87,9 @@ class CommunicationPlugin {
     });
     window.ipcRenderer.on('active-times-changed', (event, activeTimes) => {
       this.store.commit('setActiveTimes', activeTimes);
+    });
+    window.ipcRenderer.on('last-active-start-changed', (event, lastActiveStart) => {
+      this.store.commit('setLastActiveStart', lastActiveStart);
     });
 
     await this.init();

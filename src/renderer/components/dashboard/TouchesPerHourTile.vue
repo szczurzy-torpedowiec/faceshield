@@ -7,7 +7,7 @@
       Your touch rate was
     </div>
     <div class="h4 d-flex align-center justify-center">
-      1 per hour
+      {{ rateString }}
       <v-menu offset-y>
         <template #activator="{ on }">
           <v-btn
@@ -31,10 +31,94 @@
       during the last
     </div>
     <v-select
+      :value="period"
       dense
       filled
-      :items="['4 hours', '8 hours', '1 day', '2 days', '3 days', '5 days', 'week', '2 weeks']"
+      :items="periodItems"
       hide-details
+      @change="setPeriod"
     />
   </v-card>
 </template>
+
+<script>
+  export default {
+    data: () => ({
+      now: new Date(),
+      periodItems: [
+        { text: '2 hours', value: 2 },
+        { text: '4 hours', value: 4 },
+        { text: '8 hours', value: 8 },
+        { text: '24 hours', value: 24 },
+        { text: '2 days', value: 48 },
+        { text: '3 days', value: 72 },
+        { text: '5 days', value: 120 },
+        { text: '1 week', value: 168 },
+        { text: '2 week', value: 336 },
+      ],
+    }),
+    computed: {
+      period() {
+        return this.$store.state.config.touchesPerHourTilePeriod;
+      },
+      timesTouched() {
+        const { touches } = this.$store.state;
+        const minTimestamp = this.now - this.period * 3600000; // hours to milliseconds
+        let i = 0;
+        while (i < touches.length) {
+          if (touches[touches.length - i - 1].timestamp < minTimestamp) break;
+          i += 1;
+        }
+        return i;
+      },
+      activeTimeDuration() {
+        const activeTimes = [
+          ...this.$store.state.activeTimes,
+        ];
+        if (this.$store.state.lastActiveStart !== null) {
+          activeTimes.push({
+            startTimestamp: this.$store.state.lastActiveStart,
+            endTimestamp: this.now.getTime(),
+          });
+        }
+        const minTimestamp = this.now - this.period * 3600000; // hours to milliseconds
+        let totalDuration = 0;
+        for (let i = activeTimes.length - 1; i >= 0; i -= 1) {
+          const activeTime = activeTimes[i];
+          if (activeTime.start < minTimestamp) {
+            const durationInRange = activeTime.end - minTimestamp;
+            if (durationInRange > 0) totalDuration += durationInRange;
+            break;
+          }
+          totalDuration += activeTime.duration;
+        }
+        return totalDuration;
+      },
+      rate() {
+        if (this.activeTimeDuration === 0) return 0;
+        return this.timesTouched / (this.activeTimeDuration / 3600000);
+      },
+      rateString() {
+        return `${this.rate.toLocaleString('en-US', {
+          maximumFractionDigits: 1,
+          minimumFractionDigits: 1,
+        })} per hour`;
+      },
+    },
+    watch: {
+      touches() {
+        this.now = new Date();
+      },
+    },
+    created() {
+      setInterval(() => {
+        this.now = new Date();
+      }, 60000);
+    },
+    methods: {
+      setPeriod(value) {
+        this.$comm.setConfigItem('touchesPerHourTilePeriod', value);
+      },
+    },
+  };
+</script>

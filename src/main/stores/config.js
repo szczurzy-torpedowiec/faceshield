@@ -51,6 +51,12 @@ const schema = {
   darkTheme: {
     type: 'boolean',
   },
+  recentTouchesTilePeriod: {
+    type: 'number',
+  },
+  touchesPerHourTilePeriod: {
+    type: 'number',
+  },
 };
 
 const defaults = {
@@ -67,6 +73,8 @@ const defaults = {
   alertVolume: 1,
   saveGifs: true,
   darkTheme: false,
+  recentTouchesTilePeriod: 1,
+  touchesPerHourTilePeriod: 24,
 };
 
 export default function createConfigStore(path) {
