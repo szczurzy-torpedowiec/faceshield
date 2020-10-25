@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import { EventEmitter } from 'events';
+import fs from 'fs';
 
 export default class RendererCommunication extends EventEmitter {
   constructor(options) {
@@ -52,7 +53,16 @@ export default class RendererCommunication extends EventEmitter {
 
     ipcMain.on('open-user-data', () => this.emit('open-user-data'));
 
-    ipcMain.on('remove-touch', (event, timestamp) => this.emit('remove-touch', timestamp));
+    ipcMain.on('remove-touch', async (event, timestamp) => {
+      const touches = this.trackingStore.get('touches');
+      const index = touches.findIndex((touch) => touch.timestamp === timestamp);
+      if (touches[index].gifPath) {
+        await fs.promises.unlink(touches[index].gifPath);
+      }
+      touches.splice(index, 1);
+      this.trackingStore.set('touches', touches);
+      event.sender.send('touches-changed', touches);
+    });
   }
 
   updatePreview(win, image) {
