@@ -1,8 +1,8 @@
 <template>
   <div class="pa-4 mx-auto dashboard">
     <control-tile />
-    <recent-touches-tile />
-    <touches-per-hour-tile />
+    <recent-touches-tile v-if="loaded" />
+    <touches-per-hour-tile v-if="loaded" />
   </div>
 </template>
 
@@ -16,6 +16,11 @@
       ControlTile,
       RecentTouchesTile,
       TouchesPerHourTile,
+    },
+    computed: {
+      loaded() {
+        return this.$store.state.activeTimes !== null && this.$store.state.touches;
+      },
     },
   };
 </script>

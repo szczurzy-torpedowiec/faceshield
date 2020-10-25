@@ -33,7 +33,7 @@
     <v-select
       dense
       filled
-      :items="['4 hours', '8 hours', '1 day', '2 days', '3 days', '5 days', 'week', '2 weeks']"
+      :items="['4 hours', '8 hours', '24 hours', '2 days', '3 days', '5 days', 'week', '2 weeks']"
       hide-details
     />
   </v-card>
