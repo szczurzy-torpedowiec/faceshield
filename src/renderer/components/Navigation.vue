@@ -14,14 +14,6 @@
             Dashboard
           </v-list-item-title>
         </v-list-item>
-        <v-list-item to="/stats">
-          <v-list-item-icon>
-            <v-icon>mdi-chart-timeline-variant</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>
-            Statistics
-          </v-list-item-title>
-        </v-list-item>
         <v-list-item to="/gallery">
           <v-list-item-icon>
             <v-icon>mdi-video</v-icon>
