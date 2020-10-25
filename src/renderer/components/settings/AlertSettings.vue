@@ -76,6 +76,22 @@
           />
         </v-list-item-action>
       </v-list-item>
+      <v-list-item @click="toggleSaveGifs">
+        <v-list-item-content>
+          <v-list-item-title>
+            Save touch recordings
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            Store short GIFs showing the moment you touch your face
+          </v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-action>
+          <v-switch
+            :input-value="saveGifs"
+            readonly
+          />
+        </v-list-item-action>
+      </v-list-item>
     </v-list>
   </v-card>
 </template>
@@ -95,6 +111,9 @@
       },
       alertVolume() {
         return this.$store.state.config.alertVolume;
+      },
+      saveGifs() {
+        return this.$store.state.config.saveGifs;
       },
     },
     created() {
@@ -119,6 +138,9 @@
         this.alertAudio.volume = this.alertVolume;
         this.alertAudio.currentTime = 0;
         this.alertAudio.play();
+      },
+      toggleSaveGifs() {
+        this.$comm.setConfigItem('saveGifs', !this.saveGifs);
       },
     },
   };

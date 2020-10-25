@@ -245,14 +245,14 @@ export default class TrackerManager extends EventEmitter {
   async saveTouch() {
     const timestamp = new Date().getTime();
     let filePath = null;
-    if (true) { // TODO: Nagrywanie włączone
+    if (this.configStore.get('saveGifs')) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      filePath = await this.saveGif(timestamp);
+      filePath = (await this.saveGif(timestamp)).toString();
     }
     const touches = this.trackingStore.get('touches');
     touches.push({
       timestamp,
-      gifPath: filePath.toString(),
+      gifPath: filePath,
     });
     this.trackingStore.set('touches', touches);
   }

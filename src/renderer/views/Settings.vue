@@ -21,7 +21,7 @@
   import DeviceSettings from '../components/settings/DeviceSettings.vue';
   import AutostartSettings from '../components/settings/AutostartSettings.vue';
   import AlertSettings from '../components/settings/AlertSettings.vue';
-  import OtherSettings from '../components/settings/OtherSettings';
+  import OtherSettings from '../components/settings/OtherSettings.vue';
 
   export default {
     components: {
