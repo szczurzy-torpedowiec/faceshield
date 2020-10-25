@@ -3,6 +3,7 @@ import path from 'path';
 import { GifFrame, GifUtil } from 'gifwrap';
 import jimp from 'jimp';
 import fs from 'fs';
+import _ from 'lodash';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
 
@@ -302,5 +303,16 @@ export default class TrackerManager extends EventEmitter {
       gifPath: filePath,
     });
     this.trackingStore.set('touches', touches);
+  }
+
+  async removeLastTouch() {
+    if (this.touchEvent === null) {
+      const touches = this.trackingStore.get('touches');
+      this.trackingStore.set('touches', _.initial(touches));
+    } else {
+      this.touchEvent = null;
+      this.touchStreak = 0;
+      this.$emit('touch-event-update', false);
+    }
   }
 }

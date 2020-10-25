@@ -1,7 +1,7 @@
 /* global __static */
 
 import {
-  app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell,
+  app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell, globalShortcut,
 } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
@@ -163,7 +163,7 @@ function createWindow() {
     trackerManager.stopPreview();
   });
 
-  Menu.setApplicationMenu(null)
+  Menu.setApplicationMenu(null);
 }
 
 app.whenReady().then(() => {
@@ -261,6 +261,10 @@ if (instanceLock) {
     }
 
     createOverlayWindow();
+
+    globalShortcut.register('CommandOrControl+Alt+F', () => {
+      if (configStore.get('shortcutEnabled')) trackerManager.removeLastTouch();
+    });
   });
 } else {
   app.quit();
