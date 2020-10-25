@@ -20,6 +20,12 @@ class CommunicationPlugin {
 
     const trackingState = await window.ipcRenderer.invoke('get-tracking-state');
     this.store.commit('setTrackingState', trackingState);
+
+    const touches = await window.ipcRenderer.invoke('get-touches');
+    this.store.commit('setTouches', touches);
+
+    const activeTimes = await window.ipcRenderer.invoke('get-active-times');
+    this.store.commit('setActiveTimes', activeTimes);
   }
 
   setConfigItem(path, value) {
@@ -68,6 +74,12 @@ class CommunicationPlugin {
     });
     window.ipcRenderer.on('tracking-state-changed', (event, trackingState) => {
       this.store.commit('setTrackingState', trackingState);
+    });
+    window.ipcRenderer.on('touches-changed', (event, touches) => {
+      this.store.commit('setTouches', touches);
+    });
+    window.ipcRenderer.on('active-times-changed', (event, activeTimes) => {
+      this.store.commit('setActiveTimes', activeTimes);
     });
 
     await this.init();
