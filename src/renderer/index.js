@@ -16,5 +16,14 @@ new Vue({
   vuetify,
   router,
   store,
+  watch: {
+    '$store.state.config.darkTheme': {
+      handler(value) {
+        if (value === null) return;
+        this.$vuetify.theme.isDark = value;
+      },
+      immediate: true,
+    },
+  },
   render: (h) => h(App),
 }).$mount('#app');
