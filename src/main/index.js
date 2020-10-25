@@ -175,6 +175,8 @@ function createWindow() {
     win = null;
     trackerManager.stopPreview();
   });
+
+  Menu.setApplicationMenu(null)
 }
 
 app.whenReady().then(() => {
