@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 py-2 mx-auto dashboard">
+  <div class="pa-4 mx-auto dashboard">
     <control-tile />
     <recent-touches-tile />
     <touches-per-hour-tile />

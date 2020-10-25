@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 py-2 mx-auto settings">
+  <div class="pa-4 mx-auto settings">
     <control-tile />
     <device-settings class="mt-4" />
     <autostart-settings class="mt-4" />
@@ -8,8 +8,7 @@
       color="primary"
       text
       block
-      class="mt-4 mb-8"
-      @click="openUserData"
+      class="mt-8 mb-4"
     >
       Open user data folder
     </v-btn>

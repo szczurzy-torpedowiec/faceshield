@@ -18,12 +18,14 @@
       <v-spacer />
       <v-btn
         v-if="active"
+        light
         @click="pauseTracking"
       >
         Pause
       </v-btn>
       <v-btn
         v-else
+        light
         @click="startTracking"
       >
         Start

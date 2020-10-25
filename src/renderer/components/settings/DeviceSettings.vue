@@ -129,7 +129,7 @@
             <v-sheet
               v-if="image === null"
               tile
-              color="grey lighten-2"
+              :color="$vuetify.theme.dark ? 'blue-grey darken-4' : 'grey lighten-2'"
               width="320"
               height="240"
               class="d-flex flex-column align-center justify-center"
@@ -184,7 +184,7 @@
           <v-sheet
             v-else
             tile
-            color="grey darken-3"
+            :color="$vuetify.theme.dark ? 'blue-grey darken-4' : 'grey darken-2'"
             width="320"
             height="240"
             class="d-flex flex-column align-center justify-center"
