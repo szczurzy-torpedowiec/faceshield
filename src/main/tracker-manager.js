@@ -12,12 +12,13 @@ export default class TrackerManager extends EventEmitter {
     this.configStore = options.configStore;
     this.gifSaveFolder = options.gifSaveFolder;
     this.trackingStore = options.trackingStore;
-    this.lastTouches = [];
     this.imageFrames = [];
-    this.lastTouchingStatus = false;
     this.trackingActive = false;
     this.previewActive = false;
     this.faceDetectStreak = 0;
+    this.touchStreak = 0;
+    this.touching = false;
+    this.touchEvent = null;
 
     this.checkLastActiveTime();
     setInterval(() => this.checkLastActiveTime(), 1000);
@@ -107,6 +108,8 @@ export default class TrackerManager extends EventEmitter {
   }
 
   stop() {
+    this.touching = false;
+    this.emit('touching-update', false);
     if (this.tracker === 'kinect') {
       this.kinect.disconnect();
     } else if (this.tracker === 'webcam') {
@@ -124,10 +127,11 @@ export default class TrackerManager extends EventEmitter {
   stopTracking() {
     if (!this.trackingActive) return;
     this.trackingActive = false;
+    this.touchEvent = false;
+    this.emit('touch-event-update', false);
+    this.updateActiveTime(false);
     if (this.previewActive) return;
     this.stop();
-    this.emit('touching-update', false);
-    this.updateActiveTime(false);
   }
 
   async startPreview() {
@@ -157,22 +161,33 @@ export default class TrackerManager extends EventEmitter {
   }
 
   handleTouching(touching) {
-    this.lastTouches.push({
-      touching,
-      timestamp: Date.now(),
-    });
-    this.lastTouches = this.lastTouches.filter((touchObj) => touchObj.timestamp > Date.now() - 500);
-    if (this.lastTouches.filter((touch) => touch.touching).length > this.lastTouches.length * 0.5
-      && this.lastTouches.length > 1) {
-      if (!this.lastTouchingStatus && this.trackingActive) {
-        this.emit('ding');
-        this.saveTouch();
-      }
-      this.lastTouchingStatus = true;
-      this.emit('touching-update', true);
+    if (touching) {
+      this.touchStreak += 1;
     } else {
-      this.lastTouchingStatus = false;
-      this.emit('touching-update', false);
+      this.touchStreak = 0;
+    }
+    this.touching = touching;
+    this.emit('touching-update', touching);
+
+    if (!this.trackingActive) return;
+
+    if (this.touchStreak >= 3) {
+      this.emit('touch-event-update', true);
+      if (this.touchEvent === null) {
+        this.emit('ding');
+        this.touchEvent = {
+          start: new Date(),
+          end: new Date(),
+        };
+      } else {
+        this.touchEvent.end = new Date();
+      }
+    } else if (this.touchEvent === null) {
+      this.emit('touch-event-update', false);
+    } else if (this.touchEvent.end < new Date() - 3000) {
+      this.emit('touch-event-update', false);
+      this.saveTouch(this.touchEvent.start.getTime());
+      this.touchEvent = null;
     }
   }
 
@@ -194,6 +209,7 @@ export default class TrackerManager extends EventEmitter {
 
   detectTouchingWebcam(data) {
     if (!data) {
+      this.handleTouching(false);
       this.updateActiveTime(false);
       return;
     }
@@ -214,7 +230,9 @@ export default class TrackerManager extends EventEmitter {
   }
 
   saveFrame(data) {
-    this.imageFrames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 10000);
+    if (this.touchEvent === null) {
+      this.imageFrames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 10000);
+    }
     this.imageFrames.push({
       timestamp: Date.now(),
       data,
@@ -222,7 +240,7 @@ export default class TrackerManager extends EventEmitter {
   }
 
   async saveGif(timestamp) {
-    const frames = this.imageFrames.filter((frame) => frame.timestamp > Date.now() - 5000);
+    const frames = this.imageFrames.filter((frame) => frame.timestamp > timestamp - 3000);
     if (frames.length === 0) return null;
     const gifFrames = await Promise.all(frames.map(async (frame) => {
       const buffer = Buffer.from(frame.data.split(',')[1], 'base64');
@@ -242,11 +260,9 @@ export default class TrackerManager extends EventEmitter {
     return filePath;
   }
 
-  async saveTouch() {
-    const timestamp = new Date().getTime();
+  async saveTouch(timestamp) {
     let filePath = null;
     if (this.configStore.get('saveGifs')) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
       filePath = (await this.saveGif(timestamp)).toString();
     }
     const touches = this.trackingStore.get('touches');
