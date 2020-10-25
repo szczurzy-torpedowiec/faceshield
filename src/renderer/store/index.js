@@ -1,46 +1,30 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import _ from 'lodash';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    autostartConfig: null,
+    config: null,
     trackingActive: null,
     previewActive: null,
-    videoInputLoaded: false,
-    videoInputLabel: null,
-    useCpuBackend: null,
-    webcamFrameWait: null,
-    tracker: null,
     webcamModelsError: null,
     webcamCameraError: null,
     webcamExecuteError: null,
-    overlayAlertsEnabled: null,
-    alertVolume: null,
   },
   mutations: {
-    setAutostartConfig(state, config) {
-      state.autostartConfig = config;
+    setConfig(state, config) {
+      state.config = config;
+    },
+    setConfigItem(state, { path, value }) {
+      _.set(state.config, path, value);
     },
     setTrackingActive(state, active) {
       state.trackingActive = active;
     },
     setPreviewActive(state, active) {
       state.previewActive = active;
-    },
-    setVideoInputLabel(state, label) {
-      state.videoInputLoaded = true;
-      state.videoInputLabel = label;
-    },
-    setUseCpuBackend(state, useCpuBackend) {
-      state.useCpuBackend = useCpuBackend;
-    },
-    setWebcamFrameWait(state, webcamFrameWait) {
-      state.webcamFrameWait = webcamFrameWait;
-    },
-    setTracker(state, tracker) {
-      state.tracker = tracker;
     },
     setWebcamModelsError(state, error) {
       state.webcamModelsError = error;
@@ -50,12 +34,6 @@ export default new Vuex.Store({
     },
     setWebcamExecuteError(state, error) {
       state.webcamExecuteError = error;
-    },
-    setOverlayAlertsEnabled(state, enabled) {
-      state.overlayAlertsEnabled = enabled;
-    },
-    setAlertVolume(state, volume) {
-      state.alertVolume = volume;
     },
   },
   actions: {

@@ -3,7 +3,7 @@
     <v-menu nudge-top="4">
       <template #activator="{ on }">
         <v-list-item
-          :disabled="videoInputs === null || !videoInputLoaded"
+          :disabled="videoInputs === null"
           v-on="on"
         >
           <v-list-item-content>
@@ -41,7 +41,7 @@
           >
             <v-list-item-content>
               <v-list-item-title>
-                {{ videoInput }}
+                {{ videoInputLabel }}
               </v-list-item-title>
               <v-list-item-subtitle>
                 Disconnected
@@ -89,11 +89,8 @@
       videoInputs: null,
     }),
     computed: {
-      videoInputLoaded() {
-        return this.$store.state.videoInputLoaded;
-      },
       videoInputLabel() {
-        return this.$store.state.videoInputLabel;
+        return this.$store.state.config.videoInputLabel;
       },
       videoInputDisconnected() {
         if (this.videoInputs === null) return null;
@@ -116,7 +113,7 @@
           .map((device) => device.label);
       },
       setVideoInputLabel(label) {
-        this.$comm.setVideoInputLabel(label);
+        this.$comm.setConfigItem('videoInputLabel', label);
       },
     },
   };

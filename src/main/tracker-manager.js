@@ -25,6 +25,19 @@ export default class TrackerManager extends EventEmitter {
     this.tracker = this.configStore.get('tracker');
     this.initKinect();
     this.initWebcam();
+
+    this.configStore.onDidChange('videoInputLabel', (label) => {
+      this.webcam.setVideoInputLabel(label);
+    });
+    this.configStore.onDidChange('useCpuBackend', (useCpuBackend) => {
+      this.webcam.setUseCpuBackend(useCpuBackend);
+    });
+    this.configStore.onDidChange('webcamFrameWait', (wait) => {
+      this.webcam.setFrameWait(wait);
+    });
+    this.configStore.onDidChange('tracker', async (tracker) => {
+      await this.setTracker(tracker);
+    });
   }
 
   checkLastActiveTime() {
