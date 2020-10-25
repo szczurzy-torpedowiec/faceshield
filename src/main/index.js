@@ -84,10 +84,11 @@ rendererCommunication.on('open-user-data', () => {
 });
 
 rendererCommunication.on('remove-touch', async (timestamp) => {
-  const touches = trackingStore.get('touches')
+  const touches = trackingStore.get('touches');
   const index = touches.findIndex((touch) => touch.timestamp === timestamp);
-  console.log(index);
-  await fs.unlink(touches[index].gifPath);
+  if (touches[index].gifPath) {
+    await fs.unlink(touches[index].gifPath);
+  }
   touches.splice(index, 1);
   trackingStore.set('touches', touches);
   if (win !== null) rendererCommunication.setTouches(win, touches);

@@ -149,7 +149,7 @@ export default class TrackerManager extends EventEmitter {
   stopTracking() {
     if (!this.trackingActive) return;
     this.trackingActive = false;
-    this.touchEvent = false;
+    this.touchEvent = null;
     this.emit('touch-event-update', false);
     this.updateActiveTime(false);
     if (this.previewActive) return;

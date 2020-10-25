@@ -51,7 +51,6 @@ export default class RendererCommunication extends EventEmitter {
     ipcMain.on('open-user-data', () => this.emit('open-user-data'));
 
     ipcMain.on('remove-touch', (event, timestamp) => this.emit('remove-touch', timestamp));
-
   }
 
   updatePreview(win, image) {

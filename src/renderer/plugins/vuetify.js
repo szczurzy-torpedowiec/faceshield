@@ -2,14 +2,14 @@ import Vue from 'vue';
 import Vuetify from 'vuetify/lib';
 import '@mdi/font/css/materialdesignicons.css';
 import VueFreezeframe from 'vue-freezeframe';
-import VueTimeago from 'vue-timeago'
+import VueTimeago from 'vue-timeago';
 
 Vue.use(VueFreezeframe);
 Vue.use(Vuetify);
 Vue.use(VueTimeago, {
   name: 'Timeago',
-  locale: 'en'
-})
+  locale: 'en',
+});
 
 export default new Vuetify({
   icons: {
