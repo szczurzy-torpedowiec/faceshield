@@ -13,8 +13,6 @@ import RendererCommunication from './renderer-communication';
 import OverlayCommunication from './overlay-communication';
 import TrackerManager from './tracker-manager';
 
-const fs = require('fs').promises;
-
 const argv = parseArgs(process.argv.slice(1));
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -81,17 +79,6 @@ configStore.onDidChange('overlayAlertsEnabled', (enabled) => {
 });
 rendererCommunication.on('open-user-data', () => {
   shell.openPath(app.getPath('userData'));
-});
-
-rendererCommunication.on('remove-touch', async (timestamp) => {
-  const touches = trackingStore.get('touches');
-  const index = touches.findIndex((touch) => touch.timestamp === timestamp);
-  if (touches[index].gifPath) {
-    await fs.unlink(touches[index].gifPath);
-  }
-  touches.splice(index, 1);
-  trackingStore.set('touches', touches);
-  if (win !== null) rendererCommunication.setTouches(win, touches);
 });
 
 trackingStore.onDidChange('touches', (touches) => {
