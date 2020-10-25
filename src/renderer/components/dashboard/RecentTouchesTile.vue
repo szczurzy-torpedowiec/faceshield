@@ -16,7 +16,7 @@
       :value="period"
       dense
       filled
-      :items="periods"
+      :items="periodItems"
       hide-details
       @change="setPeriod"
     />
@@ -27,7 +27,7 @@
   export default {
     data: () => ({
       now: new Date(),
-      periods: [
+      periodItems: [
         { text: '15 minutes', value: 0.25 },
         { text: '30 minutes', value: 0.5 },
         { text: '1 hour', value: 1 },
@@ -61,7 +61,7 @@
     created() {
       setInterval(() => {
         this.now = new Date();
-      }, 30);
+      }, 30000);
     },
     methods: {
       setPeriod(value) {
