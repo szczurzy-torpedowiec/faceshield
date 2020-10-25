@@ -37,6 +37,7 @@ const trackerManager = new TrackerManager({
 });
 const rendererCommunication = new RendererCommunication({
   configStore,
+  trackingStore,
   getTrackingActive: () => trackerManager.trackingActive,
   getPreviewActive: () => trackerManager.previewActive,
   getWebcamModelsError: () => trackerManager.webcam.modelsError,
@@ -78,6 +79,13 @@ configStore.onDidChange('overlayAlertsEnabled', (enabled) => {
 });
 rendererCommunication.on('open-user-data', () => {
   shell.openPath(app.getPath('userData'));
+});
+
+trackingStore.onDidChange('touches', (touches) => {
+  if (win !== null) rendererCommunication.setTouches(win, touches);
+});
+trackingStore.onDidChange('activeTimes', (activeTimes) => {
+  if (win !== null) rendererCommunication.setActiveTimes(win, activeTimes);
 });
 
 trackerManager.on('preview-update', (args) => {

@@ -13,6 +13,8 @@ export default new Vuex.Store({
     webcamCameraError: null,
     webcamExecuteError: null,
     trackingState: null,
+    touches: null,
+    activeTimes: null,
   },
   mutations: {
     setConfig(state, config) {
@@ -38,6 +40,12 @@ export default new Vuex.Store({
     },
     setTrackingState(state, trackingState) {
       state.trackingState = trackingState;
+    },
+    setTouches(state, touches) {
+      state.touches = touches;
+    },
+    setActiveTimes(state, activeTimes) {
+      state.activeTimes = activeTimes;
     },
   },
   actions: {

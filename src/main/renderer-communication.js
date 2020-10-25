@@ -5,6 +5,7 @@ export default class RendererCommunication extends EventEmitter {
   constructor(options) {
     super();
     this.configStore = options.configStore;
+    this.trackingStore = options.trackingStore;
     this.getTrackingState = options.getTrackingState;
     this.getTrackingActive = options.getTrackingActive;
     this.getPreviewActive = options.getPreviewActive;
@@ -44,6 +45,9 @@ export default class RendererCommunication extends EventEmitter {
 
     ipcMain.handle('get-tracking-state', () => this.getTrackingState());
 
+    ipcMain.handle('get-touches', () => this.trackingStore.get('touches'));
+    ipcMain.handle('get-active-times', () => this.trackingStore.get('activeTimes'));
+
     ipcMain.on('open-user-data', () => this.emit('open-user-data'));
   }
 
@@ -77,5 +81,13 @@ export default class RendererCommunication extends EventEmitter {
 
   setTouchingPreview(win, touching) {
     win.webContents.send('set-touching-preview', touching);
+  }
+
+  setTouches(win, touches) {
+    win.webContents.send('touches-changed', touches);
+  }
+
+  setActiveTimes(win, activeTimes) {
+    win.webContents.send('active-times-changed', activeTimes);
   }
 }
