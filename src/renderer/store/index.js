@@ -12,6 +12,7 @@ export default new Vuex.Store({
     webcamModelsError: null,
     webcamCameraError: null,
     webcamExecuteError: null,
+    trackingState: null,
   },
   mutations: {
     setConfig(state, config) {
@@ -34,6 +35,9 @@ export default new Vuex.Store({
     },
     setWebcamExecuteError(state, error) {
       state.webcamExecuteError = error;
+    },
+    setTrackingState(state, trackingState) {
+      state.trackingState = trackingState;
     },
   },
   actions: {

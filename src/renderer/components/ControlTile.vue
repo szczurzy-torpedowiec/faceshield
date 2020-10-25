@@ -32,9 +32,9 @@
       </v-btn>
     </v-sheet>
     <v-expand-transition>
-      <div v-if="active === true">
+      <div v-if="active === true && trackingState !== null">
         <v-alert
-          v-if="state === 'tracker-loading'"
+          v-if="trackingState === 'tracker-loading'"
           tile
           class="mb-0"
         >
@@ -50,7 +50,7 @@
           Tracker loading
         </v-alert>
         <v-alert
-          v-else-if="state === 'tracker-error'"
+          v-else-if="trackingState === 'tracker-error'"
           icon="mdi-alert-circle"
           color="red"
           tile
@@ -60,7 +60,7 @@
           Tracking error
         </v-alert>
         <v-alert
-          v-else-if="state === 'face-not-detected'"
+          v-else-if="trackingState === 'face-not-detected'"
           icon="mdi-face"
           color="amber darken-2"
           tile
@@ -70,7 +70,7 @@
           Face not detected
         </v-alert>
         <v-alert
-          v-else-if="state === 'not-touching'"
+          v-else-if="trackingState === 'not-touching'"
           icon="mdi-emoticon"
           tile
           class="mb-0"
@@ -78,7 +78,7 @@
           Not touching face
         </v-alert>
         <v-alert
-          v-else-if="state === 'touching'"
+          v-else-if="trackingState === 'touching'"
           icon="mdi-emoticon-sad"
           tile
           color="deep-orange"
@@ -94,21 +94,15 @@
 
 <script>
   export default {
-    data: () => ({
-      state: 'face-not-detected',
-    }),
     computed: {
       active() {
         return this.$store.state.trackingActive;
       },
-    },
-    created() {
-      setInterval(this.randomiseState, 1500);
+      trackingState() {
+        return this.$store.state.trackingState;
+      },
     },
     methods: {
-      randomiseState() {
-        this.state = ['tracker-loading', 'tracker-error', 'face-not-detected', 'not-touching', 'touching'][Math.floor(Math.random() * 5)];
-      },
       startTracking() {
         this.$comm.startTracking();
       },

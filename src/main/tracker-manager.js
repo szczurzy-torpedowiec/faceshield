@@ -19,6 +19,9 @@ export default class TrackerManager extends EventEmitter {
     this.touchStreak = 0;
     this.touching = false;
     this.touchEvent = null;
+    this.state = null;
+    this.loaded = false;
+    this.faceDetected = false;
 
     this.checkLastActiveTime();
     setInterval(() => this.checkLastActiveTime(), 1000);
@@ -39,6 +42,19 @@ export default class TrackerManager extends EventEmitter {
     this.configStore.onDidChange('tracker', async (tracker) => {
       await this.setTracker(tracker);
     });
+  }
+
+  updateState() {
+    const oldState = this.state;
+    if (!this.trackingActive && !this.previewActive) this.state = null;
+    else if (this.tracker === 'webcam' && this.webcam.anyError) this.state = 'tracker-error';
+    else if (!this.loaded) this.state = 'tracker-loading';
+    else if (!this.faceDetected) this.state = 'face-not-detected';
+    else if (this.touching) this.state = 'touching';
+    else this.state = 'not-touching';
+
+    if (this.state === oldState) return;
+    this.emit('state-update', this.state);
   }
 
   checkLastActiveTime() {
@@ -97,24 +113,30 @@ export default class TrackerManager extends EventEmitter {
       this.detectTouchingWebcam(data);
       this.emit('webcam-data-update', data);
     });
+    this.webcam.on('any-error', () => { this.updateState(); });
   }
 
   async start() {
+    this.loaded = false;
     if (this.tracker === 'kinect') {
       await this.kinect.connect();
     } else if (this.tracker === 'webcam') {
       await this.webcam.start();
     }
+    this.updateState();
   }
 
   stop() {
+    this.loaded = false;
     this.touching = false;
+    this.faceDetected = false;
     this.emit('touching-update', false);
     if (this.tracker === 'kinect') {
       this.kinect.disconnect();
     } else if (this.tracker === 'webcam') {
       this.webcam.stop();
     }
+    this.updateState();
   }
 
   async startTracking() {
@@ -189,32 +211,41 @@ export default class TrackerManager extends EventEmitter {
       this.saveTouch(this.touchEvent.start.getTime());
       this.touchEvent = null;
     }
+
+    this.updateState();
   }
 
   detectTouchingKinect(skeleton) {
+    this.loaded = true;
     let touching = false;
     if (skeleton.head) {
       this.updateActiveTime(true);
       skeleton.hands.forEach((hand) => {
         if (
           (hand.x >= skeleton.head.x && hand.x <= (skeleton.head.x + skeleton.head.dx))
-        && (hand.y <= skeleton.head.y && hand.y >= (skeleton.head.y + skeleton.head.dy))
+            && (hand.y <= skeleton.head.y && hand.y >= (skeleton.head.y + skeleton.head.dy))
         ) touching = true;
       });
-    } else {
-      this.updateActiveTime(false);
     }
+
+    this.faceDetected = !!skeleton.head;
+    this.updateActiveTime(this.faceDetected);
     this.handleTouching(touching, 50);
   }
 
   detectTouchingWebcam(data) {
     if (!data) {
+      this.faceDetected = false;
+      this.loaded = false;
       this.handleTouching(false);
       this.updateActiveTime(false);
+      this.updateState();
       return;
     }
+    this.loaded = true;
 
-    this.updateActiveTime(data.facesBounds.length > 0);
+    this.faceDetected = data.facesBounds.length > 0;
+    this.updateActiveTime(this.faceDetected);
     this.saveFrame(data.image);
 
     const touchJoints = data.hands.flatMap((hand) => hand.landmarks);

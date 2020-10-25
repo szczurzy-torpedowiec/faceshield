@@ -5,6 +5,7 @@ export default class RendererCommunication extends EventEmitter {
   constructor(options) {
     super();
     this.configStore = options.configStore;
+    this.getTrackingState = options.getTrackingState;
     this.getTrackingActive = options.getTrackingActive;
     this.getPreviewActive = options.getPreviewActive;
     this.getWebcamModelsError = options.getWebcamModelsError;
@@ -41,6 +42,8 @@ export default class RendererCommunication extends EventEmitter {
     ipcMain.handle('get-webcam-camera-error', () => this.getWebcamCameraError());
     ipcMain.handle('get-webcam-execute-error', () => this.getWebcamExecuteError());
 
+    ipcMain.handle('get-tracking-state', () => this.getTrackingState());
+
     ipcMain.on('open-user-data', () => this.emit('open-user-data'));
   }
 
@@ -66,6 +69,10 @@ export default class RendererCommunication extends EventEmitter {
 
   setWebcamExecuteError(win, error) {
     win.webContents.send('webcam-execute-error-changed', error);
+  }
+
+  setTrackingState(win, trackingState) {
+    win.webContents.send('tracking-state-changed', trackingState);
   }
 
   setTouchingPreview(win, touching) {
