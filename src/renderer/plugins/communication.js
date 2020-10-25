@@ -1,25 +1,13 @@
 class CommunicationPlugin {
   async init() {
-    const autostartConfig = await window.ipcRenderer.invoke('get-autostart-config');
-    this.store.commit('setAutostartConfig', autostartConfig);
+    const config = await window.ipcRenderer.invoke('get-config');
+    this.store.commit('setConfig', config);
 
     const trackingActive = await window.ipcRenderer.invoke('get-tracking-active');
     this.store.commit('setTrackingActive', trackingActive);
 
     const previewActive = await window.ipcRenderer.invoke('get-preview-active');
     this.store.commit('setPreviewActive', previewActive);
-
-    const videoInputLabel = await window.ipcRenderer.invoke('get-video-input-label');
-    this.store.commit('setVideoInputLabel', videoInputLabel);
-
-    const useCpuBackend = await window.ipcRenderer.invoke('get-use-cpu-backend');
-    this.store.commit('setUseCpuBackend', useCpuBackend);
-
-    const webcamFrameWait = await window.ipcRenderer.invoke('get-webcam-frame-wait');
-    this.store.commit('setWebcamFrameWait', webcamFrameWait);
-
-    const tracker = await window.ipcRenderer.invoke('get-tracker');
-    this.store.commit('setTracker', tracker);
 
     const webcamModelsError = await window.ipcRenderer.invoke('get-webcam-models-error');
     this.store.commit('setWebcamModelsError', webcamModelsError);
@@ -29,16 +17,10 @@ class CommunicationPlugin {
 
     const webcamExecuteError = await window.ipcRenderer.invoke('get-webcam-execute-error');
     this.store.commit('setWebcamExecuteError', webcamExecuteError);
-
-    const overlayAlertsEnabled = await window.ipcRenderer.invoke('get-overlay-alerts-enabled');
-    this.store.commit('setOverlayAlertsEnabled', overlayAlertsEnabled);
-
-    const alertVolume = await window.ipcRenderer.invoke('get-alert-volume');
-    this.store.commit('setAlertVolume', alertVolume);
   }
 
-  setAutostartConfig(config) {
-    window.ipcRenderer.send('set-autostart-config', config);
+  setConfigItem(path, value) {
+    window.ipcRenderer.send('set-config-item', path, value);
   }
 
   startTracking() {
@@ -57,56 +39,20 @@ class CommunicationPlugin {
     window.ipcRenderer.send('stop-preview');
   }
 
-  setVideoInputLabel(label) {
-    window.ipcRenderer.send('set-video-input-label', label);
-  }
-
-  setUseCpuBackend(useCpuBackend) {
-    window.ipcRenderer.send('set-use-cpu-backend', useCpuBackend);
-  }
-
-  setWebcamFrameWait(webcamFrameWait) {
-    window.ipcRenderer.send('set-webcam-frame-wait', webcamFrameWait);
-  }
-
-  setTracker(tracker) {
-    window.ipcRenderer.send('set-tracker', tracker);
-  }
-
-  setOverlayAlertsEnabled(enabled) {
-    window.ipcRenderer.send('set-overlay-alerts-enabled', enabled);
-  }
-
-  setAlertVolume(volume) {
-    window.ipcRenderer.send('set-alert-volume', volume);
-  }
-
   openUserData() {
     window.ipcRenderer.send('open-user-data');
   }
 
   async install(Vue, options) {
     this.store = options.store;
-    window.ipcRenderer.on('autostart-config-changed', (event, config) => {
-      this.store.commit('setAutostartConfig', config);
+    window.ipcRenderer.on('config-item-changed', (event, path, value) => {
+      this.store.commit('setConfigItem', { path, value });
     });
     window.ipcRenderer.on('tracking-active-changed', (event, active) => {
       this.store.commit('setTrackingActive', active);
     });
     window.ipcRenderer.on('preview-active-changed', (event, active) => {
       this.store.commit('setPreviewActive', active);
-    });
-    window.ipcRenderer.on('video-input-label-changed', (event, label) => {
-      this.store.commit('setVideoInputLabel', label);
-    });
-    window.ipcRenderer.on('use-cpu-backend-changed', (event, useCpuBackend) => {
-      this.store.commit('setUseCpuBackend', useCpuBackend);
-    });
-    window.ipcRenderer.on('webcam-frame-wait-changed', (event, webcamFrameWait) => {
-      this.store.commit('setWebcamFrameWait', webcamFrameWait);
-    });
-    window.ipcRenderer.on('tracker-changed', (event, tracker) => {
-      this.store.commit('setTracker', tracker);
     });
     window.ipcRenderer.on('webcam-models-error-changed', (event, error) => {
       this.store.commit('setWebcamModelsError', error);
@@ -117,26 +63,14 @@ class CommunicationPlugin {
     window.ipcRenderer.on('webcam-execute-error-changed', (event, error) => {
       this.store.commit('setWebcamExecuteError', error);
     });
-    window.ipcRenderer.on('overlay-alerts-enabled-changed', (event, enabled) => {
-      this.store.commit('setOverlayAlertsEnabled', enabled);
-    });
-    window.ipcRenderer.on('alert-volume-changed', (event, volume) => {
-      this.store.commit('setAlertVolume', volume);
-    });
 
     await this.init();
     Vue.prototype.$comm = {
-      setAutostartConfig: this.setAutostartConfig,
+      setConfigItem: this.setConfigItem,
       startTracking: this.startTracking,
       pauseTracking: this.pauseTracking,
       startPreview: this.startPreview,
       stopPreview: this.stopPreview,
-      setVideoInputLabel: this.setVideoInputLabel,
-      setUseCpuBackend: this.setUseCpuBackend,
-      setWebcamFrameWait: this.setWebcamFrameWait,
-      setTracker: this.setTracker,
-      setOverlayAlertsEnabled: this.setOverlayAlertsEnabled,
-      setAlertVolume: this.setAlertVolume,
       openUserData: this.openUserData,
     };
   }

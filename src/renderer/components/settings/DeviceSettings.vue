@@ -5,10 +5,10 @@
   >
     <v-card-title>Device configuration</v-card-title>
     <v-btn-toggle
-      v-model="tracker"
-      :mandatory="tracker !== null"
+      :value="tracker"
       class="align-self-center mb-4"
       dense
+      @change="setTracker"
     >
       <v-btn
         value="kinect"
@@ -97,12 +97,11 @@
                     </v-list-item-subtitle>
                   </v-list-item-content>
                   <v-list-item-action-text>
-                    {{ webcamFrameWait === null ? '--' : webcamFrameWait }} ms
+                    {{ webcamFrameWait }} ms
                   </v-list-item-action-text>
                 </div>
                 <v-slider
                   :value="webcamFrameWait"
-                  :disabled="webcamFrameWait === null"
                   dense
                   hide-details
                   min="0"
@@ -299,18 +298,13 @@
         return null;
       },
       useCpuBackend() {
-        return this.$store.state.useCpuBackend;
+        return this.$store.state.config.useCpuBackend;
       },
       webcamFrameWait() {
-        return this.$store.state.webcamFrameWait;
+        return this.$store.state.config.webcamFrameWait;
       },
-      tracker: {
-        get() {
-          return this.$store.state.tracker;
-        },
-        set(value) {
-          this.$comm.setTracker(value);
-        },
+      tracker() {
+        return this.$store.state.config.tracker;
       },
       webcamModelsError() {
         if (this.tracker !== 'webcam') return null;
@@ -362,11 +356,14 @@
       window.ipcRenderer.on('set-touching-preview', (event, touching) => { this.touching = touching; });
     },
     methods: {
+      setTracker(value) {
+        this.$comm.setConfigItem('tracker', value);
+      },
       toggleUseCpuBackend() {
-        this.$comm.setUseCpuBackend(!this.useCpuBackend);
+        this.$comm.setConfigItem('useCpuBackend', !this.useCpuBackend);
       },
       setWebcamFrameWait(wait) {
-        this.$comm.setWebcamFrameWait(wait);
+        this.$comm.setConfigItem('webcamFrameWait', wait);
       },
       startPreview() {
         this.$comm.startPreview();

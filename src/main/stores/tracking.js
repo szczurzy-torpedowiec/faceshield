@@ -10,7 +10,14 @@ const schema = {
           type: 'number',
         },
         gifPath: {
-          type: 'string',
+          listOf: [
+            {
+              type: 'string',
+            },
+            {
+              type: 'null',
+            },
+          ],
         },
       },
     },

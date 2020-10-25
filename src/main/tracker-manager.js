@@ -25,6 +25,19 @@ export default class TrackerManager extends EventEmitter {
     this.tracker = this.configStore.get('tracker');
     this.initKinect();
     this.initWebcam();
+
+    this.configStore.onDidChange('videoInputLabel', (label) => {
+      this.webcam.setVideoInputLabel(label);
+    });
+    this.configStore.onDidChange('useCpuBackend', (useCpuBackend) => {
+      this.webcam.setUseCpuBackend(useCpuBackend);
+    });
+    this.configStore.onDidChange('webcamFrameWait', (wait) => {
+      this.webcam.setFrameWait(wait);
+    });
+    this.configStore.onDidChange('tracker', async (tracker) => {
+      await this.setTracker(tracker);
+    });
   }
 
   checkLastActiveTime() {
@@ -232,14 +245,14 @@ export default class TrackerManager extends EventEmitter {
   async saveTouch() {
     const timestamp = new Date().getTime();
     let filePath = null;
-    if (true) { // TODO: Nagrywanie włączone
+    if (this.configStore.get('saveGifs')) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      filePath = await this.saveGif(timestamp);
+      filePath = (await this.saveGif(timestamp)).toString();
     }
     const touches = this.trackingStore.get('touches');
     touches.push({
       timestamp,
-      gifPath: filePath.toString(),
+      gifPath: filePath,
     });
     this.trackingStore.set('touches', touches);
   }

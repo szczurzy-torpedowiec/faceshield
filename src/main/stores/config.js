@@ -45,6 +45,12 @@ const schema = {
   alertVolume: {
     type: 'number',
   },
+  saveGifs: {
+    type: 'boolean',
+  },
+  darkTheme: {
+    type: 'boolean',
+  },
 };
 
 const defaults = {
@@ -59,6 +65,8 @@ const defaults = {
   webcamFrameWait: 0,
   overlayAlertsEnabled: true,
   alertVolume: 1,
+  saveGifs: true,
+  darkTheme: false,
 };
 
 export default function createConfigStore(path) {

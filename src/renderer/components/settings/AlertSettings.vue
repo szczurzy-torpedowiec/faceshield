@@ -5,7 +5,6 @@
     </v-card-title>
     <v-list>
       <v-list-item
-        :disabled="overlayAlertsEnabled === null"
         @click="toggleOverlayAlertsEnabled"
       >
         <v-list-item-title>
@@ -14,7 +13,6 @@
         <v-list-item-action>
           <v-switch
             :input-value="overlayAlertsEnabled"
-            :disabled="overlayAlertsEnabled === null"
             readonly
           />
         </v-list-item-action>
@@ -32,12 +30,11 @@
             Disabled
           </v-list-item-action-text>
           <v-list-item-action-text v-else>
-            {{ alertVolume === null ? '--' : Math.round(alertVolume * 100) }}%
+            {{ Math.round(alertVolume * 100) }}%
           </v-list-item-action-text>
         </div>
         <v-slider
           :value="alertVolume"
-          :disabled="alertVolume === null"
           dense
           hide-details
           min="0"
@@ -79,6 +76,22 @@
           />
         </v-list-item-action>
       </v-list-item>
+      <v-list-item @click="toggleSaveGifs">
+        <v-list-item-content>
+          <v-list-item-title>
+            Save touch recordings
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            Store short GIFs showing the moment you touch your face
+          </v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-action>
+          <v-switch
+            :input-value="saveGifs"
+            readonly
+          />
+        </v-list-item-action>
+      </v-list-item>
     </v-list>
   </v-card>
 </template>
@@ -94,10 +107,13 @@
     }),
     computed: {
       overlayAlertsEnabled() {
-        return this.$store.state.overlayAlertsEnabled;
+        return this.$store.state.config.overlayAlertsEnabled;
       },
       alertVolume() {
-        return this.$store.state.alertVolume;
+        return this.$store.state.config.alertVolume;
+      },
+      saveGifs() {
+        return this.$store.state.config.saveGifs;
       },
     },
     created() {
@@ -105,10 +121,10 @@
     },
     methods: {
       toggleOverlayAlertsEnabled() {
-        this.$comm.setOverlayAlertsEnabled(!this.overlayAlertsEnabled);
+        this.$comm.setConfigItem('overlayAlertsEnabled', !this.overlayAlertsEnabled);
       },
       setAlertVolume(value) {
-        this.$comm.setAlertVolume(value);
+        this.$comm.setConfigItem('alertVolume', value);
         this.playAlertDebounced();
       },
       decreaseAlertVolume() {
@@ -122,6 +138,9 @@
         this.alertAudio.volume = this.alertVolume;
         this.alertAudio.currentTime = 0;
         this.alertAudio.play();
+      },
+      toggleSaveGifs() {
+        this.$comm.setConfigItem('saveGifs', !this.saveGifs);
       },
     },
   };

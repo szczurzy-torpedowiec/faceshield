@@ -47,10 +47,10 @@ const overlayCommunication = new OverlayCommunication({
   configStore,
 });
 
-rendererCommunication.on('autostart-config-changed', (config) => {
+configStore.onDidChange('autostart-config', (autostartConfig) => {
   app.setLoginItemSettings({
-    openAtLogin: config.enabled,
-    openAsHidden: config.minimise,
+    openAtLogin: autostartConfig.enabled,
+    openAsHidden: autostartConfig.minimise,
     args: [
       '--autostart',
     ],
@@ -69,19 +69,7 @@ rendererCommunication.on('start-preview', async () => {
 rendererCommunication.on('stop-preview', async () => {
   trackerManager.stopPreview();
 });
-rendererCommunication.on('video-input-label-changed', (label) => {
-  trackerManager.webcam.setVideoInputLabel(label);
-});
-rendererCommunication.on('use-cpu-backend-changed', (useCpuBackend) => {
-  trackerManager.webcam.setUseCpuBackend(useCpuBackend);
-});
-rendererCommunication.on('webcam-frame-wait-changed', (wait) => {
-  trackerManager.webcam.setFrameWait(wait);
-});
-rendererCommunication.on('tracker-changed', async (tracker) => {
-  await trackerManager.setTracker(tracker);
-});
-rendererCommunication.on('overlay-alerts-enabled-changed', (enabled) => {
+configStore.onDidChange('overlayAlertsEnabled', (enabled) => {
   if (enabled) {
     overlayCommunication.setTouching(overlayWin, trackerManager.lastTouchingStatus);
   } else {

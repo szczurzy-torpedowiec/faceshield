@@ -11,14 +11,7 @@
     >
       Autostart cannot be enabled in development mode
     </v-alert>
-    <v-progress-circular
-      v-if="autostartConfig === null"
-      indeterminate
-      class="mx-auto my-4 d-block"
-      :size="48"
-      color="primary"
-    />
-    <v-list v-else>
+    <v-list>
       <v-list-item
         :disabled="isDevelopment"
         @click="toggleAutostartEnabled"
@@ -75,28 +68,19 @@
     }),
     computed: {
       autostartConfig() {
-        return this.$store.state.autostartConfig;
+        return this.$store.state.config.autostart;
       },
     },
     methods: {
       toggleAutostartEnabled() {
         if (this.isDevelopment) return;
-        this.$comm.setAutostartConfig({
-          ...this.autostartConfig,
-          enabled: !this.autostartConfig.enabled,
-        });
+        this.$comm.setConfigItem('autostart.enabled', !this.autostartConfig.enabled);
       },
       toggleAutostartStartTracking() {
-        this.$comm.setAutostartConfig({
-          ...this.autostartConfig,
-          startTracking: !this.autostartConfig.startTracking,
-        });
+        this.$comm.setConfigItem('autostart.startTracking', !this.autostartConfig.startTracking);
       },
       toggleAutostartMinimise() {
-        this.$comm.setAutostartConfig({
-          ...this.autostartConfig,
-          minimise: !this.autostartConfig.minimise,
-        });
+        this.$comm.setConfigItem('autostart.minimise', !this.autostartConfig.minimise);
       },
     },
   };

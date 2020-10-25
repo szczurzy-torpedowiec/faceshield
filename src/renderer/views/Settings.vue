@@ -4,6 +4,7 @@
     <device-settings class="mt-4" />
     <autostart-settings class="mt-4" />
     <alert-settings class="mt-4" />
+    <other-settings class="mt-4" />
     <v-btn
       color="primary"
       text
@@ -20,6 +21,7 @@
   import DeviceSettings from '../components/settings/DeviceSettings.vue';
   import AutostartSettings from '../components/settings/AutostartSettings.vue';
   import AlertSettings from '../components/settings/AlertSettings.vue';
+  import OtherSettings from '../components/settings/OtherSettings.vue';
 
   export default {
     components: {
@@ -27,6 +29,7 @@
       DeviceSettings,
       AutostartSettings,
       AlertSettings,
+      OtherSettings,
     },
     beforeRouteLeave(to, from, next) {
       this.$comm.stopPreview();
