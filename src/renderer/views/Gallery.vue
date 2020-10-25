@@ -17,7 +17,7 @@
                 <timeago :datetime="touch.timestamp"/>
               </v-col>
               <v-col class="py-0" align="right">
-                <v-btn icon @click="deleteTouch(index)">
+                <v-btn icon @click="deleteTouch(index, touch.timestamp)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </v-col>
@@ -35,10 +35,9 @@
       touches: [],
     }),
     methods: {
-      deleteTouch(index) {
-        console.log('test');
+      deleteTouch(index, timestamp) {
         this.touches.splice(index, 1);
-        this.$comm.removeTouch(this.touches[index].timestamp);
+        this.$comm.removeTouch(timestamp);
       },
     },
     mounted() {
