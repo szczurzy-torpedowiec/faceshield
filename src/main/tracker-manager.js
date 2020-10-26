@@ -1,8 +1,6 @@
 import { EventEmitter } from 'events';
+import { fork } from 'child_process';
 import path from 'path';
-import { GifFrame, GifUtil } from 'gifwrap';
-import jimp from 'jimp';
-import fs from 'fs';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
 
@@ -270,31 +268,40 @@ export default class TrackerManager extends EventEmitter {
     });
   }
 
-  async saveGif(timestamp) {
-    const frames = this.imageFrames.filter((frame) => frame.timestamp > timestamp - 3000);
-    if (frames.length === 0) return null;
-    const gifFrames = await Promise.all(frames.map(async (frame) => {
-      const buffer = Buffer.from(frame.data.split(',')[1], 'base64');
-      const j = await jimp.read(buffer);
-      j.resize(jimp.AUTO, 240);
-      return new GifFrame(j.bitmap);
-    }));
-
-    GifUtil.quantizeDekker(gifFrames, 32);
-    try {
-      await fs.promises.mkdir(this.gifSaveFolder);
-    } catch (error) {
-      if (error.code !== 'EEXIST') throw error;
-    }
-    const filePath = path.join(this.gifSaveFolder, `${timestamp}.gif`);
-    await GifUtil.write(filePath, gifFrames, { loops: 0 });
-    return filePath;
+  saveGif(timestamp) {
+    return new Promise((resolve, reject) => {
+      try {
+        const frames = this.imageFrames.filter((frame) => frame.timestamp > timestamp - 3000);
+        if (frames.length === 0) {
+          resolve(null);
+          return;
+        }
+        const process = fork(path.join(__dirname, './gifEncoder.js'));
+        process.on('message', ({ filePath }) => { resolve(filePath); });
+        process.on('exit', (code) => {
+          if (code !== 0) {
+            reject(new Error('Failed to save GIF'));
+          }
+        });
+        process.send({
+          folder: this.gifSaveFolder,
+          timestamp,
+          frames,
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 
   async saveTouch(timestamp) {
     let filePath = null;
     if (this.configStore.get('saveGifs')) {
-      filePath = (await this.saveGif(timestamp)).toString();
+      try {
+        filePath = (await this.saveGif(timestamp)).toString();
+      } catch (error) {
+        console.error(error);
+      }
     }
     const touches = this.trackingStore.get('touches');
     touches.push({

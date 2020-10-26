@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   transpileDependencies: [
     'vuetify',
@@ -31,6 +33,12 @@ module.exports = {
         '@tensorflow/tfjs-backend-webgl',
         '@tensorflow/tfjs-backend-cpu',
       ],
+      chainWebpackMainProcess(config) {
+        config
+          .entry('gifEncoder')
+          .add(path.join(__dirname, 'src/gifEncoder.js'))
+          .end();
+      },
       builderOptions: {
         appId: 'io.github.doteq.faceshield',
         productName: 'Face Shield',
