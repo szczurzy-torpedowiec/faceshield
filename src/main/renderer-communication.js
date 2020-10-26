@@ -106,6 +106,6 @@ export default class RendererCommunication extends EventEmitter {
   }
 
   setLastActiveStart(win, startTimestamp) {
-    win.webContents.emit('last-active-start-changed', startTimestamp);
+    win.webContents.send('last-active-start-changed', startTimestamp);
   }
 }
