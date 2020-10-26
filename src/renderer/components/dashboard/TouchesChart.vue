@@ -144,6 +144,7 @@
                 position: 'left',
                 ticks: {
                   beginAtZero: true,
+                  suggestedMax: 20,
                 },
               },
               {
