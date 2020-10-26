@@ -1,7 +1,7 @@
 /* global __static */
 
 import {
-  app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell,
+  app, protocol, BrowserWindow, Menu, Tray, nativeImage, shell, globalShortcut,
 } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
@@ -130,8 +130,6 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
 
-console.log(app.getPath('userData'));
-
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
@@ -162,6 +160,8 @@ function createWindow() {
     win = null;
     trackerManager.stopPreview();
   });
+
+  Menu.setApplicationMenu(null);
 }
 
 app.whenReady().then(() => {
@@ -233,9 +233,9 @@ const instanceLock = app.requestSingleInstanceLock();
 if (instanceLock) {
   app.on('ready', async () => {
     if (isDevelopment && !process.env.IS_TEST) {
-      // Install Vue Devtools
       try {
         await installExtension(VUEJS_DEVTOOLS);
+        console.log('Installed Vue Devtools');
       } catch (e) {
         console.error('Vue Devtools failed to install:', e.toString());
       }
@@ -259,6 +259,10 @@ if (instanceLock) {
     }
 
     createOverlayWindow();
+
+    globalShortcut.register('CommandOrControl+Alt+F', () => {
+      if (configStore.get('shortcutEnabled')) trackerManager.removeLastTouch();
+    });
   });
 } else {
   app.quit();

@@ -144,6 +144,7 @@
                 position: 'left',
                 ticks: {
                   beginAtZero: true,
+                  suggestedMax: 20,
                 },
               },
               {
@@ -183,13 +184,13 @@
     methods: {
       previousDay() {
         const newDate = new Date(this.date);
-        newDate.setDate(newDate.getDate() - 1);
+        newDate.setUTCDate(newDate.getUTCDate() - 1);
         [this.date] = newDate.toISOString().split('T');
       },
       nextDay() {
         if (!this.nextDayEnabled) return;
         const newDate = new Date(this.date);
-        newDate.setDate(newDate.getDate() + 1);
+        newDate.setUTCDate(newDate.getUTCDate() + 1);
         [this.date] = newDate.toISOString().split('T');
       },
     },

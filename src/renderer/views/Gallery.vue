@@ -37,10 +37,13 @@
             <v-sheet
               v-else
               color="blue-grey darken-3"
-              class="grow fill-height d-flex align-center justify-center py-1"
+              class="grow fill-height d-flex align-center justify-center py-2"
               tile
             >
-              <v-icon :size="64">
+              <v-icon
+                :size="64"
+                dark
+              >
                 mdi-video-off
               </v-icon>
             </v-sheet>
@@ -64,7 +67,7 @@
                   </v-icon>
                 </v-btn>
               </template>
-              <v-card color="grey darken-3">
+              <v-card :color="$vuetify.theme.isDark ? 'grey darken-3' : 'white'">
                 <v-card-title>Delete event?</v-card-title>
                 <v-card-subtitle>
                   You cannot undo this

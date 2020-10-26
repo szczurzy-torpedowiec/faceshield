@@ -10,6 +10,7 @@
     "electron:build": "vue-cli-service electron:build",
     "electron:serve": "vue-cli-service electron:serve",
     "electron:debug": "vue-cli-service electron:serve --inspect-brk=9223",
+    "electron:generate-icons": "electron-icon-builder --input=./public/icon.png --output=build --flatten",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },
@@ -48,6 +49,7 @@
     "babel-eslint": "^10.1.0",
     "electron": "^10.1.3",
     "electron-devtools-installer": "^3.1.0",
+    "electron-icon-builder": "^1.0.2",
     "eslint": "^7.11.0",
     "eslint-config-vuetify": "^0.6.1",
     "eslint-plugin-vue": "^7.0.1",

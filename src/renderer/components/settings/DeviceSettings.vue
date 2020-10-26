@@ -8,6 +8,7 @@
       :value="tracker"
       class="align-self-center mb-4"
       dense
+      mandatory
       @change="setTracker"
     >
       <v-btn

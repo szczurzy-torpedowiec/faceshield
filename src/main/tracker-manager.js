@@ -310,4 +310,15 @@ export default class TrackerManager extends EventEmitter {
     });
     this.trackingStore.set('touches', touches);
   }
+
+  async removeLastTouch() {
+    if (this.touchEvent === null) {
+      const touches = this.trackingStore.get('touches');
+      this.trackingStore.set('touches', _.initial(touches));
+    } else {
+      this.touchEvent = null;
+      this.touchStreak = 0;
+      this.$emit('touch-event-update', false);
+    }
+  }
 }
