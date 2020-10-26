@@ -76,18 +76,22 @@
           ...this.$store.state.activeTimes,
         ];
         if (this.$store.state.lastActiveStart !== null) {
+          const startTimestamp = this.$store.state.lastActiveStart;
+          const endTimestamp = this.now.getTime();
           activeTimes.push({
-            startTimestamp: this.$store.state.lastActiveStart,
-            endTimestamp: this.now.getTime(),
+            startTimestamp,
+            endTimestamp,
+            duration: endTimestamp - startTimestamp,
           });
         }
         const minTimestamp = this.now - this.period * 3600000; // hours to milliseconds
         let totalDuration = 0;
         for (let i = activeTimes.length - 1; i >= 0; i -= 1) {
           const activeTime = activeTimes[i];
-          if (activeTime.start < minTimestamp) {
-            const durationInRange = activeTime.end - minTimestamp;
+          if (activeTime.startTimestamp < minTimestamp) {
+            const durationInRange = activeTime.endTimestamp - minTimestamp;
             if (durationInRange > 0) totalDuration += durationInRange;
+            console.log('PING', durationInRange);
             break;
           }
           totalDuration += activeTime.duration;
