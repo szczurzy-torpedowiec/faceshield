@@ -98,11 +98,10 @@
 
 <script>
   import _ from 'lodash';
-  import ding from '../../../assets/face-touch-ding.wav';
 
   export default {
     data: () => ({
-      alertAudio: new Audio(ding),
+      alertAudio: new Audio('static://./face-touch-ding.wav'),
       playAlertDebounced: null,
     }),
     computed: {

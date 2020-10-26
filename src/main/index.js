@@ -173,6 +173,14 @@ app.whenReady().then(() => {
     const pathname = decodeURI(request.url.replace('file:///', ''));
     callback(pathname);
   });
+  protocol.registerFileProtocol('static', (request, callback) => {
+    const pathname = decodeURI(request.url.replace('static://', ''));
+    const absolutePath = path.join(__static, pathname);
+    // eslint-disable-next-line standard/no-callback-literal
+    callback({
+      path: absolutePath,
+    });
+  });
 });
 
 function createTray() {

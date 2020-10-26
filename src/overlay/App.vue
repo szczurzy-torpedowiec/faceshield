@@ -27,14 +27,13 @@
 
 <script>
   import KeyboardKey from './components/KeyboardKey.vue';
-  import ding from '../assets/face-touch-ding.wav';
 
   export default {
     name: 'App',
     components: { KeyboardKey },
     data: () => ({
       touching: false,
-      audio: new Audio(ding),
+      audio: new Audio('static://./face-touch-ding.wav'),
       shortcutEnabled: null,
     }),
     async created() {
