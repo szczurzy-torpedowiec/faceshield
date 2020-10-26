@@ -1,6 +1,7 @@
 {
   "name": "faceshield",
-  "version": "0.1.0",
+  "version": "1.0.1",
+  "description": "Face touching detection application",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
