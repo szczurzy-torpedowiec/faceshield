@@ -130,8 +130,6 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
 
-console.log(app.getPath('userData'));
-
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
@@ -235,9 +233,9 @@ const instanceLock = app.requestSingleInstanceLock();
 if (instanceLock) {
   app.on('ready', async () => {
     if (isDevelopment && !process.env.IS_TEST) {
-      // Install Vue Devtools
       try {
         await installExtension(VUEJS_DEVTOOLS);
+        console.log('Installed Vue Devtools');
       } catch (e) {
         console.error('Vue Devtools failed to install:', e.toString());
       }
