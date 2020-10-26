@@ -10,13 +10,15 @@
         <div class="alert__body">
           Face touching detected!
         </div>
-        <div class="alert__divider" />
-        <div class="alert__remove">
-          Press <keyboard-key>ctrl</keyboard-key>
-          + <keyboard-key>alt</keyboard-key>
-          + <keyboard-key>f</keyboard-key>
-          to remove from history
-        </div>
+        <template v-if="shortcutEnabled">
+          <div class="alert__divider" />
+          <div class="alert__remove">
+            Press <keyboard-key>ctrl</keyboard-key>
+            + <keyboard-key>alt</keyboard-key>
+            + <keyboard-key>f</keyboard-key>
+            to remove from history
+          </div>
+        </template>
       </div>
     </div>
     <div class="light-bottom" />
@@ -33,8 +35,9 @@
     data: () => ({
       touching: false,
       audio: new Audio(ding),
+      shortcutEnabled: null,
     }),
-    created() {
+    async created() {
       window.ipcRenderer.on('overlay:set-touching', (event, touching) => {
         this.touching = touching;
       });
@@ -43,6 +46,10 @@
         this.audio.currentTime = 0;
         this.audio.play();
       });
+      window.ipcRenderer.on('overlay:shortcut-enabled-changed', (event, enabled) => {
+        this.shortcutEnabled = enabled;
+      });
+      this.shortcutEnabled = await window.ipcRenderer.invoke('overlay:get-shortcut-enabled');
     },
   };
 </script>

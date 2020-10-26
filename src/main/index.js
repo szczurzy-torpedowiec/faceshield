@@ -71,11 +71,15 @@ rendererCommunication.on('stop-preview', async () => {
   trackerManager.stopPreview();
 });
 configStore.onDidChange('overlayAlertsEnabled', (enabled) => {
+  if (overlayWin === null) return;
   if (enabled) {
     overlayCommunication.setTouching(overlayWin, trackerManager.touchEvent !== null);
   } else {
     overlayCommunication.setTouching(overlayWin, false);
   }
+});
+configStore.onDidChange('shortcutEnabled', (enabled) => {
+  if (overlayWin !== null) overlayCommunication.setShortcutEnabled(overlayWin, enabled);
 });
 rendererCommunication.on('open-user-data', () => {
   shell.openPath(app.getPath('userData'));
