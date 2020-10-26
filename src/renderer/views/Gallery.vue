@@ -37,10 +37,13 @@
             <v-sheet
               v-else
               color="blue-grey darken-3"
-              class="grow fill-height d-flex align-center justify-center py-1"
+              class="grow fill-height d-flex align-center justify-center py-2"
               tile
             >
-              <v-icon :size="64">
+              <v-icon
+                :size="64"
+                dark
+              >
                 mdi-video-off
               </v-icon>
             </v-sheet>
