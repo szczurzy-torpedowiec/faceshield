@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { fork } from 'child_process';
 import path from 'path';
+import _ from 'lodash';
 import Kinect from './trackers/kinect';
 import Webcam from './trackers/webcam';
 
