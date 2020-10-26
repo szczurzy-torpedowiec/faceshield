@@ -91,7 +91,6 @@
           if (activeTime.startTimestamp < minTimestamp) {
             const durationInRange = activeTime.endTimestamp - minTimestamp;
             if (durationInRange > 0) totalDuration += durationInRange;
-            console.log('PING', durationInRange);
             break;
           }
           totalDuration += activeTime.duration;
