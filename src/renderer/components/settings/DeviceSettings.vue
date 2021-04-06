@@ -58,6 +58,17 @@
               Face Shield only works with Kinect v1 drivers.
               Make sure you have installed correct one
             </v-alert>
+            <v-slider
+              label="Tilt"
+              :value="kinectTilt"
+              dense
+              hide-details
+              min="-27"
+              max="27"
+              ticks
+              thumb-label
+              @change="setKinectTilt"
+            />
           </div>
           <div
             v-else-if="tracker === 'webcam'"
@@ -260,6 +271,7 @@
 </template>
 
 <script>
+  import { debounce } from 'lodash';
   import PreviewAlert from './PreviewAlert.vue';
   import VideoInputSelect from './VideoInputSelect.vue';
 
@@ -297,6 +309,9 @@
         if (this.tracker === 'webcam' && this.webcamData !== null) return this.webcamData.image;
         if (this.tracker === 'kinect') return this.kinectImage;
         return null;
+      },
+      kinectTilt() {
+        return this.$store.state.config.kinectTilt;
       },
       useCpuBackend() {
         return this.$store.state.config.useCpuBackend;
@@ -360,6 +375,9 @@
       setTracker(value) {
         this.$comm.setConfigItem('tracker', value);
       },
+      setKinectTilt: debounce(function updateTilt(tilt) {
+        this.$comm.setConfigItem('kinectTilt', tilt);
+      }, 1000),
       toggleUseCpuBackend() {
         this.$comm.setConfigItem('useCpuBackend', !this.useCpuBackend);
       },

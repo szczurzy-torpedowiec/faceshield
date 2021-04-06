@@ -32,6 +32,9 @@ export default class TrackerManager extends EventEmitter {
     this.configStore.onDidChange('videoInputLabel', (label) => {
       this.webcam.setVideoInputLabel(label);
     });
+    this.configStore.onDidChange('kinectTilt', (value) => {
+      this.kinect.tilt(value);
+    });
     this.configStore.onDidChange('useCpuBackend', (useCpuBackend) => {
       this.webcam.setUseCpuBackend(useCpuBackend);
     });

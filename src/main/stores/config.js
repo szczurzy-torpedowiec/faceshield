@@ -33,6 +33,9 @@ const schema = {
     type: 'string',
     enum: ['kinect', 'webcam'],
   },
+  kinectTilt: {
+    type: 'number',
+  },
   useCpuBackend: {
     type: 'boolean',
   },

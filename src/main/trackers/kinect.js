@@ -8,6 +8,8 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 export default class Kinect extends EventEmitter {
   async connect() {
     let executed = false;
+    let activeTilt = null;
+    this.tiltvalue = null;
     const modulePath = isDevelopment
       ? './modules/FaceShieldKinectModule/FaceShieldKinectModule/bin/Release/FaceShieldKinectModule.exe'
       : './modules/FaceShieldKinectModule/FaceShieldKinectModule.exe';
@@ -21,6 +23,10 @@ export default class Kinect extends EventEmitter {
         client.on('connect', (connection) => {
           this.emit('connected');
           connection.on('message', (message) => {
+            if (activeTilt !== this.tiltvalue) {
+              activeTilt = this.tiltvalue;
+              connection.sendUTF(`tilt:${activeTilt}`);
+            }
             const msg = JSON.parse(message.utf8Data);
             if (msg.type === 'image') {
               this.emit('preview-update', msg.data);
@@ -38,5 +44,9 @@ export default class Kinect extends EventEmitter {
 
   disconnect() {
     if (this.moduleProcess) this.moduleProcess.kill();
+  }
+
+  tilt(value) {
+    this.tiltvalue = value;
   }
 }
